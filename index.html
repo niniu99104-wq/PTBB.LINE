@@ -3,35 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>團購明細與進度查詢</title>
+  <title>團購明細與出貨查詢</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1><P>📝 豆媽選品記事本</P>
-        <P>團購明細與進度查詢</P></h1>
+    <h1><p>📝 豆媽選品記事本團購</p>
+        <p>結帳明細與出貨查詢</h1></p>
     
-    <div class="search-box" style="flex-direction: column;">
-    <h1>  <P><input type="text" id="communityInput" placeholder="請輸入社群名稱"></P>
-      <P><input type="text" id="searchInput" placeholder="請輸入手機末六碼"></P>
-      <p><button onclick="searchOrders()">查詢明細</button></p></h1>
+    <div class="search-box">
+      <p><input type="text" id="communityInput" placeholder="社群名稱 (需與註冊一致)"></p>
+      <p><input type="text" id="searchInput" placeholder="手機末六碼"></p>
+      <p><button onclick="searchOrders()">查詢帳單</button></p>
+      <p><button onclick="toggleRegister()" class="btn-secondary">第一次買？點我註冊</button></p>
     </div>
 
+    <div id="registerBox" class="hidden register-box">
+      <h3>✨ 初次購買請先註冊</h3>
+      <p>註冊後，後台才會自動幫你建檔算帳喔！</p>
+      <p><input type="text" id="regCommunity" placeholder="您的社群名稱 (必填)"></p>
+      <p><input type="text" id="regPhone" placeholder="手機末六碼 (必填)"></p>
+      <p><input type="text" id="regName" placeholder="真實姓名 (方便出貨核對)"></p>
+      <button onclick="submitRegister()" class="btn-submit">送出註冊</button>
+    </div>
 
-    <div id="loading" class="hidden">資料撈取中，請稍候...</div>
+    <div id="loading" class="hidden">處理中，請稍候...</div>
 
     <div id="resultContainer" class="hidden">
-      
       <div class="summary-card">
-        <h3>💰 您的帳單總覽</h3>
+        <h3>💰 帳單總覽</h3>
         <p>未結帳總金額：<span id="unpaidTotal" class="highlight-red">$0</span></p>
         <p>已結帳總金額：<span id="paidTotal">$0</span></p>
-        
         <div class="shipping-notice" id="shippingNotice"></div>
       </div>
-
       <div id="orderList"></div>
-
     </div>
   </div>
 
