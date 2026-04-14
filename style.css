@@ -1,43 +1,66 @@
 * { box-sizing: border-box; font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "微軟正黑體", sans-serif; }
-body { background-color: #f2f4f6; margin: 0; padding: 15px; }
-.container { max-width: 500px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-h1 { font-size: 20px; text-align: center; margin: 0 0 20px 0; color: #2c3e50; }
+
+/* 韓系莫蘭迪背景：帶一點暖灰的燕麥色 */
+body { background-color: #F4F1ED; margin: 0; padding: 15px; color: #4A4643; }
+
+/* 主容器：保留白色，增加溫柔的暖色陰影，邊角稍微修圓 */
+.container { max-width: 500px; margin: 0 auto; background: #FFFFFF; padding: 20px; border-radius: 16px; box-shadow: 0 8px 24px rgba(163, 154, 143, 0.15); }
+h1 { font-size: 20px; text-align: center; margin: 0 0 20px 0; color: #5C554D; font-weight: 600; letter-spacing: 1px; }
 
 .search-box { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 .btn-group { display: flex; gap: 10px; }
 .btn-group button { flex: 1; }
-input[type="text"] { padding: 12px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 16px; margin: 0; }
-button { padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; color: #fff; background-color: #5a67d8; font-weight: bold; }
-.btn-secondary { background-color: #718096; }
-.btn-submit { background-color: #2b6cb0; width: 100%; margin-top: 10px; }
+
+/* 輸入框：溫潤的邊框與底色 */
+input[type="text"] { padding: 12px; border: 1px solid #DCD7D0; border-radius: 8px; font-size: 15px; background-color: #FCFAEF; color: #4A4643; outline: none; transition: 0.3s; }
+input[type="text"]:focus { border-color: #A3B19B; background-color: #FFFFFF; }
+input[type="text"]::placeholder { color: #A8A39D; }
+
+/* 按鈕：莫蘭迪低飽和色系，增加微過渡動畫 */
+button { padding: 12px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; color: #FFFFFF; font-weight: 500; letter-spacing: 0.5px; transition: 0.3s; }
+/* 查詢按鈕：灰綠色 (Sage Green) */
+button[onclick="searchOrders()"] { background-color: #8C9C8A; }
+button[onclick="searchOrders()"]:hover { background-color: #798A77; }
+/* 註冊按鈕：奶茶灰 (Taupe) */
+.btn-secondary { background-color: #B3AAA0; }
+.btn-secondary:hover { background-color: #9C9388; }
+/* 送出按鈕：莫蘭迪藍灰 (Slate Blue) */
+.btn-submit { background-color: #8696A7; width: 100%; margin-top: 10px; }
+.btn-submit:hover { background-color: #728292; }
 
 .hidden { display: none !important; }
-#loading { text-align: center; font-size: 15px; padding: 15px; color: #4a5568; }
+#loading { text-align: center; font-size: 15px; padding: 15px; color: #8C857D; }
 
-.register-box { background: #edf2f7; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-.register-box h3 { font-size: 16px; margin: 0 0 12px 0; color: #2d3748; }
-.register-box input { margin-bottom: 10px; width: 100%; }
+/* 註冊框背景：淺灰棕色 */
+.register-box { background: #F7F5F0; padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #EBE7E0; }
+.register-box h3 { font-size: 16px; margin: 0 0 12px 0; color: #5C554D; }
+.register-box input { margin-bottom: 10px; width: 100%; background-color: #FFFFFF; }
 
-/* 總覽區塊加大 */
-.summary-card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 24px; font-size: 16px; }
-.summary-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-weight: bold; color: #2d3748;}
-.highlight-red { color: #e53e3e; font-size: 18px;}
-.shipping-notice { font-size: 15px; color: #4a5568; border-top: 1px dashed #cbd5e0; padding-top: 12px; line-height: 1.6; }
+/* 總覽區塊：柔和的燕麥白 */
+.summary-card { background-color: #FCFAF8; border: 1px solid #EAE5DE; padding: 18px; border-radius: 12px; margin-bottom: 24px; font-size: 15px; }
+.summary-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; font-weight: 600; color: #5C554D; }
+/* 未結帳紅字：改成莫蘭迪磚紅色，不那麼刺眼 */
+.highlight-red { color: #B66D63; font-size: 18px; }
+.shipping-notice { font-size: 14px; color: #7A746D; border-top: 1px dashed #DCD7D0; padding-top: 12px; line-height: 1.6; }
 .shipping-notice div { margin-bottom: 4px; }
 
-/* 團名大標題 */
-.group-section { margin-bottom: 24px; }
-.group-title { font-size: 18px; font-weight: bold; color: #2d3748; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 12px; }
+/* 團名大標題：加點設計感，帶有溫和的底色 */
+.group-section { margin-bottom: 24px; background: #FFFFFF; }
+.group-title { font-size: 16px; font-weight: 600; color: #5C554D; padding: 10px 12px; background-color: #F2EFE9; border-radius: 8px; margin-bottom: 12px; letter-spacing: 0.5px; }
 
-/* 單筆明細放大 */
-.order-item { padding: 10px 0; border-bottom: 1px solid #edf2f7; }
+/* 單筆明細：拉開一點呼吸感 */
+.order-item { padding: 12px 6px; border-bottom: 1px solid #F0ECE6; }
 .order-item:last-child { border-bottom: none; }
-.order-title { font-size: 16px; font-weight: 600; color: #2d3748; margin-bottom: 6px; }
-.order-details { display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+.order-title { font-size: 15px; font-weight: 500; color: #4A4643; margin-bottom: 8px; }
+.order-details { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #6E6862; }
 
-/* 標籤放大 */
-.badge { padding: 4px 8px; border-radius: 4px; font-size: 13px; font-weight: bold; }
-.badge-unpaid { background-color: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
-.badge-paid { background-color: #f0fff4; color: #276749; }
-.badge-progress { background-color: #edf2f7; color: #4a5568; }
-.badge-arrived { background-color: #ebf8ff; color: #2b6cb0; }
+/* 莫蘭迪色系標籤 (低飽和、溫和的對比) */
+.badge { padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; letter-spacing: 0.5px; }
+/* 未結帳：豆沙粉 */
+.badge-unpaid { background-color: #F3E4E2; color: #A66861; border: none; }
+/* 已結帳：灰薄荷綠 */
+.badge-paid { background-color: #E2ECE1; color: #6A8A66; }
+/* 運送中/進度：燕麥灰 */
+.badge-progress { background-color: #EBEAE6; color: #7A746D; }
+/* 已到貨：迷霧藍 */
+.badge-arrived { background-color: #E4EBF0; color: #698299; }
