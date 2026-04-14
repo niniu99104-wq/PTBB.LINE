@@ -11,10 +11,10 @@
     <h1><P>📝 豆媽選品記事本</P>
         <P>團購明細與進度查詢</P></h1>
     
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="請輸入社群名稱">
+    <div class="search-box" style="flex-direction: column;">
+      <input type="text" id="communityInput" placeholder="請輸入社群名稱">
       <input type="text" id="searchInput" placeholder="請輸入手機末六碼">
-      <button onclick="searchOrders()">查詢</button>
+      <button onclick="searchOrders()">查詢明細</button>
     </div>
 
     <div id="loading" class="hidden">資料撈取中，請稍候...</div>
