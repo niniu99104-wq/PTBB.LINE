@@ -86,8 +86,8 @@ function renderResults(orders) {
 
   for (let group in groups) {
     if (groups[group].totalAmount >= groups[group].threshold) {
-      // 達到廠商門檻 -> 廠商直發
-      noticeHtml += `<p style="color:#276749; margin:4px 0;">✅ <b>${group}</b>：滿額 $${groups[group].totalAmount}，由廠商直接免運寄出！</p>`;
+      // 達到廠商門檻 -> 直接顯示「廠商直寄」
+      noticeHtml += `<p style="color:#276749; margin:4px 0;">✅ <b>${group}</b>：滿額 $${groups[group].totalAmount}，<b>廠商直寄！</b></p>`;
     } else {
       // 未達廠商門檻 -> 丟進你的湊單池
       combinedPoolAmount += groups[group].totalAmount;
