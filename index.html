@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>團購明細查詢</title>
+  <title>團購明細與進度查詢</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,6 +17,7 @@
       <p><button onclick="searchOrders()">查詢明細</button></p></h1>
     </div>
 
+
     <div id="loading" class="hidden">資料撈取中，請稍候...</div>
 
     <div id="resultContainer" class="hidden">
@@ -25,7 +26,8 @@
         <h3>💰 您的帳單總覽</h3>
         <p>未結帳總金額：<span id="unpaidTotal" class="highlight-red">$0</span></p>
         <p>已結帳總金額：<span id="paidTotal">$0</span></p>
-        <p class="shipping-notice" id="shippingNotice"></p>
+        
+        <div class="shipping-notice" id="shippingNotice"></div>
       </div>
 
       <div id="orderList"></div>
