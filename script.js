@@ -76,7 +76,8 @@ function renderResults(orders) {
     noticeDiv.innerText = "🎉 您的總金額已達免運門檻！";
     noticeDiv.style.color = "#276749";
   } else {
-    noticeDiv.innerText = `💡 累計總額 $${totalAmount}，還差 $${1000 - totalAmount} 即可湊免運。`;
+    noticeDiv.innerText = `💡 累計總額 $${totalAmount}，還差 $${1500 - totalAmount} 即可湊超商免運。`;
+    noticeDiv.innerText = `💡 累計總額 $${totalAmount}，還差 $${2000 - totalAmount} 即可湊宅配免運。`;
     noticeDiv.style.color = "#666";
   }
 
