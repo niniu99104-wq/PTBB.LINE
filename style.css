@@ -1,40 +1,41 @@
-* { box-sizing: border-box; font-family: "Helvetica Neue", Helvetica, Arial, "PingFang TC", "微軟正黑體", sans-serif; }
-body { background-color: #f7f9fa; color: #333; margin: 0; padding: 20px; }
-.container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 24px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-h1 { font-size: 20px; text-align: center; color: #2c3e50; margin-bottom: 24px; }
+* { box-sizing: border-box; font-family: sans-serif; }
+body { background-color: #f2f4f6; margin: 0; padding: 8px; }
+.container { max-width: 480px; margin: 0 auto; background: #fff; padding: 12px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+h1 { font-size: 16px; text-align: center; margin: 0 0 12px 0; color: #2c3e50; }
 
-.search-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-input[type="text"] { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; width: 100%; }
-input[type="text"]:focus { border-color: #6c5ce7; }
-
-button { padding: 12px; background-color: #6c5ce7; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.2s; }
-button:hover { background-color: #5b4bc4; }
+/* 搜尋與註冊區塊：縮減高度與間距 */
+.search-box { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.btn-group { display: flex; gap: 6px; }
+.btn-group button { flex: 1; }
+input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; margin: 0; }
+button { padding: 8px; border: none; border-radius: 4px; font-size: 13px; cursor: pointer; color: #fff; background-color: #5a67d8; margin: 0; }
 .btn-secondary { background-color: #718096; }
-.btn-secondary:hover { background-color: #4a5568; }
-.btn-submit { width: 100%; margin-top: 10px; background-color: #2b6cb0; }
-.btn-submit:hover { background-color: #2c5282; }
+.btn-submit { background-color: #2b6cb0; width: 100%; margin-top: 6px; }
 
 .hidden { display: none !important; }
-#loading { text-align: center; color: #888; margin: 20px 0; font-weight: bold; }
+#loading { text-align: center; font-size: 13px; padding: 8px; color: #666; }
 
-.register-box { background: #edf2f7; padding: 20px; border-radius: 8px; margin-top: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-.register-box h3 { margin-top: 0; color: #2d3748; font-size: 16px; }
-.register-box p { font-size: 13px; color: #666; margin-bottom: 12px; }
-.register-box input { margin-bottom: 10px; }
+/* 註冊框：壓縮上下邊距 */
+.register-box { background: #edf2f7; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
+.register-box h3 { font-size: 13px; margin: 0 0 8px 0; color: #2d3748; }
+.register-box input { margin-bottom: 6px; }
 
-.summary-card { background-color: #f8f9fe; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; margin-bottom: 24px; }
-.summary-card h3 { margin: 0 0 12px 0; font-size: 16px; color: #2d3748; }
-.summary-card p { margin: 8px 0; font-size: 15px; }
-.highlight-red { color: #e53e3e; font-weight: bold; font-size: 18px; }
-.shipping-notice { margin-top: 12px; font-size: 14px; color: #666; border-top: 1px dashed #cbd5e0; padding-top: 12px; }
+/* 總覽區塊：極致壓縮，讓免運提示貼緊數字 */
+.summary-card { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+.summary-row { display: flex; justify-content: space-around; margin-bottom: 4px; font-weight: bold; }
+.highlight-red { color: #e53e3e; }
+.shipping-notice { font-size: 12px; color: #4a5568; border-top: 1px dashed #cbd5e0; padding-top: 6px; margin-top: 4px; line-height: 1.3; }
 
-.order-item { border: 1px solid #edf2f7; padding: 16px; border-radius: 8px; margin-bottom: 12px; background: #fafafa; }
-.order-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; color: #718096; }
-.order-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #2d3748; }
-.order-details { display: flex; justify-content: space-between; align-items: center; }
+/* 單筆訂單明細：改成類似表格的超緊湊列表 */
+.order-item { border-bottom: 1px solid #edf2f7; padding: 6px 0; }
+.order-item:last-child { border-bottom: none; padding-bottom: 0; }
+.order-header { display: flex; justify-content: space-between; font-size: 11px; color: #718096; margin-bottom: 2px; align-items: center; }
+.order-title { font-size: 13px; font-weight: 600; color: #2d3748; margin-bottom: 2px; }
+.order-details { display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 
-.badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-.badge-unpaid { background-color: #fed7d7; color: #c53030; }
-.badge-paid { background-color: #c6f6d5; color: #276749; }
-.badge-progress { background-color: #e2e8f0; color: #4a5568; }
-.badge-arrived { background-color: #bee3f8; color: #2b6cb0; }
+/* 標籤微調：縮小尺寸但不影響辨識 */
+.badge { padding: 2px 4px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+.badge-unpaid { background-color: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+.badge-paid { background-color: #f0fff4; color: #276749; }
+.badge-progress { background-color: #edf2f7; color: #4a5568; }
+.badge-arrived { background-color: #ebf8ff; color: #2b6cb0; }
