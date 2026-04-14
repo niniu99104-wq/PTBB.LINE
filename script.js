@@ -1,6 +1,52 @@
-// 👇 請換成你最新部署的 GAS 網址！
-const API_URL = "https://script.google.com/macros/s/AKfycbz2gLosc1uEWbVicvbHwcs7rj5jy5eomGwbEukgNS76y4uJELwE95-lLnEr8zXiBNgY/exec"; 
+// 👇 務必換成你最新部署的 GAS 網址！
+const API_URL = "https://script.google.com/macros/s/AKfycbxlSeK-dB_i9pMIO4g5qdOtyYgAFWS70kPcS8Zvmwiw6NrZtuCaU5nCAnBUq-SuWaEzMA/exec"; 
 
+// 控制註冊表單開關
+function toggleRegister() {
+  const box = document.getElementById('registerBox');
+  box.classList.toggle('hidden');
+}
+
+// 處理註冊送出
+async function submitRegister() {
+  const community = document.getElementById('regCommunity').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
+  const name = document.getElementById('regName').value.trim();
+
+  if (!community || !phone) {
+    alert("社群名稱與手機末六碼為必填項目！");
+    return;
+  }
+
+  document.getElementById('loading').innerText = "資料建檔中，請稍候...";
+  document.getElementById('loading').classList.remove('hidden');
+
+  try {
+    // 改用 GET 確保跨網域不會被擋，且能收到精準回覆
+    const queryUrl = `${API_URL}?action=register&community=${encodeURIComponent(community)}&phone=${encodeURIComponent(phone)}&name=${encodeURIComponent(name)}`;
+    const response = await fetch(queryUrl);
+    const result = await response.json();
+
+    document.getElementById('loading').classList.add('hidden');
+
+    if (result.success) {
+      alert(result.message);
+      // 註冊成功後自動將資料填入查詢框
+      document.getElementById('communityInput').value = community;
+      document.getElementById('searchInput').value = phone;
+      toggleRegister();
+    } else {
+      alert(result.message); // 顯示重複註冊等警告
+    }
+
+  } catch (error) {
+    console.error("註冊失敗:", error);
+    alert("系統發生連線錯誤，請稍後再試。");
+    document.getElementById('loading').classList.add('hidden');
+  }
+}
+
+// 處理訂單查詢
 async function searchOrders() {
   const communityInput = document.getElementById('communityInput').value.trim();
   const codeInput = document.getElementById('searchInput').value.trim();
@@ -10,6 +56,7 @@ async function searchOrders() {
     return;
   }
 
+  document.getElementById('loading').innerText = "資料撈取中，請稍候...";
   document.getElementById('loading').classList.remove('hidden');
   document.getElementById('resultContainer').classList.add('hidden');
   document.getElementById('orderList').innerHTML = '';
@@ -22,7 +69,7 @@ async function searchOrders() {
     document.getElementById('loading').classList.add('hidden');
 
     if (data.length === 0) {
-      alert("查無訂單！請確認「社群名稱」或「手機末六碼」是否輸入正確。");
+      alert("查無訂單！請確認「社群名稱」或「手機末六碼」是否輸入正確，或確認是否已註冊。");
       return;
     }
 
@@ -35,12 +82,11 @@ async function searchOrders() {
   }
 }
 
+// 渲染明細與運費門檻
 function renderResults(orders) {
   let unpaidSum = 0;
   let paidSum = 0;
   const orderListDiv = document.getElementById('orderList');
-
-  // 用來把同一個團的金額加總，判斷有沒有過廠商門檻
   const groups = {}; 
 
   orders.forEach(order => {
@@ -48,17 +94,14 @@ function renderResults(orders) {
     const groupName = order['團名'];
     const threshold = parseInt(order['廠商免運門檻']) || 999999;
 
-    // 計算總帳
     if (order['結帳狀態'] === '未結帳') unpaidSum += amount;
     else if (order['結帳狀態'] === '已結帳') paidSum += amount;
 
-    // 分組統計金額
     if (!groups[groupName]) {
       groups[groupName] = { totalAmount: 0, threshold: threshold };
     }
     groups[groupName].totalAmount += amount;
 
-    // 畫出單筆明細卡片
     const paymentBadgeClass = order['結帳狀態'] === '未結帳' ? 'badge-unpaid' : 'badge-paid';
     const statusBadgeClass = order['到貨狀態'].includes('已') ? 'badge-arrived' : 'badge-progress';
     const cardHtml = `
@@ -80,21 +123,17 @@ function renderResults(orders) {
   document.getElementById('unpaidTotal').innerText = `$${unpaidSum}`;
   document.getElementById('paidTotal').innerText = `$${paidSum}`;
 
-  // ======== 運費判斷邏輯 ========
-  let combinedPoolAmount = 0; // 需要由你湊單出貨的總額
+  let combinedPoolAmount = 0; 
   let noticeHtml = "";
 
   for (let group in groups) {
     if (groups[group].totalAmount >= groups[group].threshold) {
-      // 達到廠商門檻 -> 直接顯示「廠商直寄」
       noticeHtml += `<p style="color:#276749; margin:4px 0;">✅ <b>${group}</b>：滿額 $${groups[group].totalAmount}，<b>廠商直寄！</b></p>`;
     } else {
-      // 未達廠商門檻 -> 丟進你的湊單池
       combinedPoolAmount += groups[group].totalAmount;
     }
   }
 
-  // 判斷你的湊單池運費
   if (combinedPoolAmount > 0) {
     noticeHtml += `<hr style="border-top: 1px dashed #cbd5e0; margin: 12px 0;">`;
     if (combinedPoolAmount >= 2000) {
