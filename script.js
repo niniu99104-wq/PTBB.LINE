@@ -1,5 +1,5 @@
 // 👇 請將下面引號內的網址，換成你 GAS 重新部署後的新網址！
-const API_URL = "https://script.google.com/macros/s/AKfycbwb-ads5E3B5u15cAje0Yh3HaXHk2pPu7UjHeIocln4D4MkbDfbRfADK1xpihYXvMLcGQ/exec"; 
+const API_URL = "https://script.google.com/macros/s/AKfycbxc5syf5Zwq5ApTy4evYT0gLkRISRJfZY8ysaS6BGr_cJKyu9spzKSNA70v8qdGkhqZHw/exec"; 
 
 async function searchOrders() {
   const communityInput = document.getElementById('communityInput').value.trim();
