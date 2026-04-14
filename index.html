@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>團購明細查詢</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📝 豆媽選品記事本團購明細與進度查詢</h1>
+    
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="請輸入手機末六碼或查詢代碼">
+      <button onclick="searchOrders()">查詢</button>
+    </div>
+
+    <div id="loading" class="hidden">資料撈取中，請稍候...</div>
+
+    <div id="resultContainer" class="hidden">
+      
+      <div class="summary-card">
+        <h3>💰 您的帳單總覽</h3>
+        <p>未結帳總金額：<span id="unpaidTotal" class="highlight-red">$0</span></p>
+        <p>已結帳總金額：<span id="paidTotal">$0</span></p>
+        <p class="shipping-notice" id="shippingNotice"></p>
+      </div>
+
+      <div id="orderList"></div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
