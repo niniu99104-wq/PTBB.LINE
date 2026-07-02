@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>會員回報系統｜豆媽選品</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FBF6EE;
+    --surface:#FFFFFF;
+    --line:#E9DFCE;
+    --text:#3E3226;
+    --muted:#9A8A76;
+    --primary:#BD8149;
+    --primary-dark:#9C6835;
+    --accent:#7C8B6A;
+    --accent-light:#EDF1E6;
+    --gold:#C79A45;
+    --gold-light:#FBF3DF;
+    --danger:#C1666B;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Noto Sans TC", -apple-system, sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:480px; margin:0 auto; padding:28px 20px 80px; }
+  header.brand{ text-align:center; margin-bottom:22px; }
+  header.brand .mark{ font-size:13px; letter-spacing:.16em; color:var(--accent); font-weight:700; text-transform:uppercase; }
+  header.brand h1{ font-family:"Noto Serif TC", serif; font-size:24px; font-weight:700; margin:8px 0 6px; }
+  header.brand p{ font-size:13px; color:var(--muted); margin:0; }
+
+  .progress{ display:flex; gap:6px; margin-bottom:24px; }
+  .progress span{ flex:1; height:4px; border-radius:2px; background:var(--line); transition:background .3s; }
+  .progress span.done{ background:var(--primary); }
+
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px 20px; margin-bottom:16px; }
+  .step-label{ font-size:12px; color:var(--accent); font-weight:700; letter-spacing:.06em; margin-bottom:4px; }
+  .step-title{ font-family:"Noto Serif TC", serif; font-size:19px; font-weight:700; margin:0 0 14px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; font-weight:500; }
+  input[type=text], input[type=tel], input[type=number], textarea{
+    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px;
+    font-size:15px; font-family:inherit; color:var(--text); background:#FFFDFA;
+  }
+  input:focus, textarea:focus{ outline:none; border-color:var(--primary); }
+  textarea{ resize:vertical; min-height:70px; }
+
+  .choice-group{ display:flex; flex-direction:column; gap:8px; }
+  .choice{ display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; cursor:pointer; font-size:14px; }
+  .choice input{ accent-color:var(--primary); width:16px; height:16px; }
+  .choice.selected{ border-color:var(--primary); background:#FBF1E4; }
+
+  .btn{ display:block; width:100%; padding:14px; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .btn-primary{ background:var(--primary); color:#fff; }
+  .btn-primary:active{ background:var(--primary-dark); }
+  .btn-primary:disabled{ background:#D9CBB6; cursor:not-allowed; }
+  .btn-ghost{ background:transparent; color:var(--muted); border:1px solid var(--line); margin-top:8px; }
+  .btn-row{ display:flex; gap:10px; margin-top:18px; }
+  .btn-row .btn{ flex:1; }
+  .link-btn{ background:none; border:none; color:var(--accent); font-size:13px; text-decoration:underline; cursor:pointer; padding:6px 0; font-family:inherit; }
+
+  /* 會員狀態卡 */
+  .member-card{
+    background:linear-gradient(135deg, var(--gold-light), #FFFDF8);
+    border:1px solid var(--gold);
+    border-radius:14px;
+    padding:16px;
+    margin-top:14px;
+  }
+  .member-card .tier-badge{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    color:#fff;
+    background:var(--gold);
+    padding:3px 10px;
+    border-radius:20px;
+    margin-bottom:8px;
+  }
+  .member-card .stat-row{ display:flex; justify-content:space-between; font-size:13px; margin-top:6px; }
+  .member-card .stat-row b{ font-family:"Noto Serif TC", serif; font-size:16px; color:var(--primary-dark); }
+
+  .pending-list{ margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+  .pending-item{
+    border:1px solid var(--line); border-radius:10px; padding:12px 14px; cursor:pointer; font-size:14px;
+  }
+  .pending-item.selected{ border-color:var(--primary); background:#FBF1E4; }
+  .pending-item .src{ font-size:11px; color:var(--accent); font-weight:700; }
+  .pending-item .amt{ font-family:"Noto Serif TC", serif; font-size:18px; font-weight:700; color:var(--primary-dark); margin-top:2px; }
+
+  .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
+  .error-text{ font-size:13px; color:var(--danger); margin-top:8px; }
+
+  .file-drop{ border:1.5px dashed var(--line); border-radius:10px; padding:20px; text-align:center; font-size:13px; color:var(--muted); cursor:pointer; }
+  .file-drop.has-file{ border-color:var(--accent); color:var(--accent); }
+  .file-preview{ margin-top:10px; max-width:100%; border-radius:8px; display:none; }
+
+  .summary-list{ font-size:14px; }
+  .summary-list dt{ color:var(--muted); font-size:12px; margin-top:10px; }
+  .summary-list dd{ margin:2px 0 0; font-weight:500; }
+
+  .success-screen{ text-align:center; padding:40px 10px; }
+  .success-screen .emoji{ font-size:44px; }
+  .success-screen h2{ font-family:"Noto Serif TC", serif; margin:12px 0 8px; }
+  .success-screen p{ color:var(--muted); font-size:14px; }
+  .success-screen .cashback-box{
+    background:var(--gold-light); border:1px solid var(--gold); border-radius:12px;
+    padding:14px; margin:16px 0; font-size:14px;
+  }
+  .success-screen .cashback-box b{ font-family:"Noto Serif TC", serif; font-size:20px; color:var(--primary-dark); }
+
+  .loading-mask{ position:fixed; inset:0; background:rgba(251,246,238,.85); display:none; align-items:center; justify-content:center; z-index:99; font-size:14px; color:var(--muted); flex-direction:column; gap:10px; }
+  .loading-mask.show{ display:flex; }
+  .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--primary); animation:spin 0.8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="loading-mask" id="loadingMask">
+  <div class="spinner"></div>
+  <div id="loadingText">處理中，請稍候…</div>
+</div>
+
+<div class="wrap">
+  <header class="brand">
+    <div class="mark">🥜 Peanut Bebe ｜豆媽選品</div>
+    <h1>會員回報系統</h1>
+    <p>登記付款與配送資訊，同時累積您的購物金</p>
+  </header>
+
+  <div class="progress" id="progressBar">
+    <span class="done"></span><span></span><span></span><span></span>
+  </div>
+
+  <form id="checkoutForm">
+
+    <!-- STEP 1：查詢會員 + 選訂單 -->
+    <div class="card step" data-step="1">
+      <div class="step-label">STEP 1</div>
+      <div class="step-title">查詢會員資料</div>
+
+      <div class="field">
+        <label for="custPhone">電話（會員識別，之後查詢也用這組）</label>
+        <input type="tel" id="custPhone" placeholder="手機號碼">
+      </div>
+      <div class="field">
+        <label for="custSocialName">社群名稱／暱稱（選填，忘記電話時可以用這個查）</label>
+        <input type="text" id="custSocialName" placeholder="例如：LINE暱稱、IG帳號">
+        <div class="hint">第一次登記時填寫，之後也能單獨用這個查詢會員資料</div>
+      </div>
+      <div class="field">
+        <label for="custName">姓名</label>
+        <input type="text" id="custName" required placeholder="您的稱呼">
+      </div>
+
+      <button type="button" class="btn btn-primary" id="searchBtn">查詢會員與訂單</button>
+      <div id="searchError" class="error-text" style="display:none;"></div>
+
+      <div id="memberCardBox"></div>
+
+      <div id="pendingBox" style="display:none;">
+        <div class="hint" style="margin-top:14px;">找到以下待確認訂單，請點選要回報的那筆：</div>
+        <div class="pending-list" id="pendingList"></div>
+      </div>
+
+      <button type="button" class="link-btn" id="toggleManual" style="display:none;"></button>
+
+      <div id="manualEntry" style="display:none;">
+        <div class="field" style="margin-top:14px;">
+          <label for="manualSource">來源／梯次</label>
+          <input type="text" id="manualSource" placeholder="例如：2026年7月團、官網訂單">
+        </div>
+        <div class="field">
+          <label for="manualItems">品項</label>
+          <input type="text" id="manualItems" placeholder="例如：MOYUUM 奶嘴 x2">
+        </div>
+        <div class="field">
+          <label for="manualAmount">應付金額</label>
+          <input type="text" id="manualAmount" placeholder="例如：850" inputmode="numeric">
+        </div>
+      </div>
+
+      <div id="creditBox" style="display:none;">
+        <div class="field" style="margin-top:14px;">
+          <label for="useCredit">使用購物金折抵（可留空，最多可折抵至 0 元）</label>
+          <input type="number" id="useCredit" min="0" placeholder="0">
+          <div class="hint">回饋金以「商品金額」計算，不含運費</div>
+        </div>
+      </div>
+
+      <div class="btn-row" id="step1Next" style="display:none;">
+        <button type="button" class="btn btn-primary" onclick="goStep(2)">下一步</button>
+      </div>
+    </div>
+
+    <!-- STEP 2：付款方式與證明 -->
+    <div class="card step" data-step="2" style="display:none;">
+      <div class="step-label">STEP 2</div>
+      <div class="step-title">付款方式與證明</div>
+
+      <div class="field">
+        <label>付款方式</label>
+        <div class="choice-group" id="payMethodGroup">
+          <label class="choice"><input type="radio" name="payMethod" value="銀行轉帳（台新812）"> 銀行轉帳（台新 812）</label>
+          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay／iPASS 手機轉帳"> LINE Pay／iPASS 手機轉帳</label>
+          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay 條碼付款"> LINE Pay 條碼付款</label>
+          <label class="choice"><input type="radio" name="payMethod" value="購物金全額折抵"> 購物金全額折抵（免付款）</label>
+        </div>
+      </div>
+
+      <div id="proofSection">
+        <div class="field">
+          <label>付款證明（擇一提供即可）</label>
+          <div class="choice-group" id="proofTypeGroup">
+            <label class="choice"><input type="radio" name="proofType" value="截圖"> 上傳付款截圖</label>
+            <label class="choice"><input type="radio" name="proofType" value="末碼"> 輸入帳號末五碼／手機末三碼</label>
+          </div>
+        </div>
+
+        <div id="proofScreenshot" style="display:none;">
+          <div class="file-drop" id="fileDrop">點此選擇付款截圖</div>
+          <input type="file" id="fileInput" accept="image/*" style="display:none;">
+          <img id="filePreview" class="file-preview">
+        </div>
+
+        <div id="proofCode" style="display:none;">
+          <div class="field" style="margin-top:14px;">
+            <label for="proofValue">末碼</label>
+            <input type="text" id="proofValue" placeholder="例如：末五碼 12345 或手機末三碼 678">
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" onclick="goStep(1)">上一步</button>
+        <button type="button" class="btn btn-primary" onclick="validateStep2AndNext()">下一步</button>
+      </div>
+    </div>
+
+    <!-- STEP 3：配送資訊 -->
+    <div class="card step" data-step="3" style="display:none;">
+      <div class="step-label">STEP 3</div>
+      <div class="step-title">配送資訊</div>
+
+      <div class="field">
+        <label>配送方式</label>
+        <div class="choice-group" id="shipMethodGroup">
+          <label class="choice"><input type="radio" name="shipMethod" value="超商取貨（7-11）"> 超商取貨（7-11 店到店）</label>
+          <label class="choice"><input type="radio" name="shipMethod" value="超商取貨（全家）"> 超商取貨（全家 店到店）</label>
+          <label class="choice"><input type="radio" name="shipMethod" value="宅配（新竹物流）"> 宅配（新竹物流）</label>
+        </div>
+        <div class="hint">⚠️ 若訂購項目包含玩具類商品，因體積較大僅提供宅配</div>
+      </div>
+
+      <div id="feeBox" style="display:none;" class="order-result">
+        <div>商品金額：NT$ <span id="feeItemAmount">0</span></div>
+        <div>運費：<span id="feeShipping">—</span></div>
+        <div class="amount">應付總額：NT$ <span id="feeTotal">0</span></div>
+      </div>
+
+      <label class="choice" style="margin:14px 0;">
+        <input type="checkbox" id="reuseAddress">
+        先前已提供過收件資料，這次不用重填
+      </label>
+
+      <div id="shipFields">
+        <div class="field"><label for="recipientName">收件人姓名</label><input type="text" id="recipientName"></div>
+        <div class="field"><label for="recipientPhone">收件人電話</label><input type="tel" id="recipientPhone"></div>
+        <div class="field"><label id="addressLabel" for="addressOrStore">地址</label><input type="text" id="addressOrStore" placeholder="宅配請填完整地址；超商請填門市名稱"></div>
+
+        <div class="field" id="storeCodeField" style="display:none;">
+          <label for="storeCode">取件門市店號（選填，不知道可以不填）</label>
+          <input type="text" id="storeCode" placeholder="例如：211147">
+          <div class="hint">在 7-11 App／ibon 或全家 App 查詢門市可以看到門市店號，沒有的話我出貨時會協助確認</div>
+        </div>
+        <div class="field" id="recipientEmailField" style="display:none;">
+          <label for="recipientEmail">Email（選填，超商取貨系統需要）</label>
+          <input type="text" id="recipientEmail" placeholder="example@mail.com">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="note">備註（湊免運／等到齊一起寄／其他需求）</label>
+        <textarea id="note" placeholder="沒有的話可以不填"></textarea>
+      </div>
+
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" onclick="goStep(2)">上一步</button>
+        <button type="button" class="btn btn-primary" onclick="showSummary()">確認送出內容</button>
+      </div>
+    </div>
+
+    <!-- STEP 4：確認送出 -->
+    <div class="card step" data-step="4" style="display:none;">
+      <div class="step-label">STEP 4</div>
+      <div class="step-title">最後確認</div>
+      <dl class="summary-list" id="summaryBox"></dl>
+      <div class="btn-row">
+        <button type="button" class="btn btn-ghost" onclick="goStep(3)">上一步</button>
+        <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitAll()">送出回報</button>
+      </div>
+    </div>
+
+  </form>
+
+  <div class="card success-screen" id="successScreen" style="display:none;">
+    <div class="emoji">🥜✅</div>
+    <h2>回報成功！</h2>
+    <p>已收到您的付款與配送資訊，會依照對帳進度為您安排出貨 ❤️</p>
+    <div class="cashback-box" id="cashbackBox"></div>
+  </div>
+</div>
+
+<script>
+// ⚠️ 部署完成後，請把下面這行換成您的 GAS 網頁應用程式網址
+var GAS_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+
+var state = {
+  member: null,
+  pendingOrders: [],
+  selectedPending: null,
+  useManualEntry: false,
+  screenshotBase64: null,
+  screenshotFileName: null,
+  shippingConfig: { storeThreshold: 1500, storeFee: 60, homeThreshold: 2000, homeFee: 100 }
+};
+
+function computeShippingFee(shipMethod, amount){
+  var cfg = state.shippingConfig;
+  var isStore = String(shipMethod || '').indexOf('超商') > -1;
+  if(isStore){ return amount >= cfg.storeThreshold ? 0 : cfg.storeFee; }
+  return amount >= cfg.homeThreshold ? 0 : cfg.homeFee;
+}
+
+function showLoading(text){
+  document.getElementById('loadingText').textContent = text || '處理中，請稍候…';
+  document.getElementById('loadingMask').classList.add('show');
+}
+function hideLoading(){ document.getElementById('loadingMask').classList.remove('show'); }
+
+function gasGet(params){
+  return new Promise(function(resolve, reject){
+    var cbName = 'gascb_' + Date.now() + '_' + Math.floor(Math.random()*10000);
+    var script = document.createElement('script');
+    window[cbName] = function(data){ resolve(data); delete window[cbName]; script.remove(); };
+    var query = Object.keys(params).map(function(k){
+      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+    }).join('&');
+    script.src = GAS_URL + '?' + query + '&callback=' + cbName;
+    script.onerror = function(){ reject(new Error('連線失敗')); };
+    document.body.appendChild(script);
+  });
+}
+
+function gasPostImage(payload){
+  return fetch(GAS_URL + '?action=uploadImage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(function(res){ return res.json(); });
+}
+
+function goStep(step){
+  document.querySelectorAll('.step').forEach(function(el){
+    el.style.display = (Number(el.dataset.step) === step) ? '' : 'none';
+  });
+  document.getElementById('checkoutForm').style.display = '';
+  document.getElementById('successScreen').style.display = 'none';
+  document.querySelectorAll('#progressBar span').forEach(function(b, i){ b.classList.toggle('done', i < step); });
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ---------- STEP 1 ----------
+document.getElementById('searchBtn').addEventListener('click', function(){
+  var name = document.getElementById('custName').value.trim();
+  var phone = document.getElementById('custPhone').value.trim();
+  var socialName = document.getElementById('custSocialName').value.trim();
+  var errorBox = document.getElementById('searchError');
+  errorBox.style.display = 'none';
+
+  if(!name){
+    errorBox.textContent = '請填寫姓名';
+    errorBox.style.display = '';
+    return;
+  }
+  if(!phone && !socialName){
+    errorBox.textContent = '請至少填寫電話或社群名稱其中一項';
+    errorBox.style.display = '';
+    return;
+  }
+
+  showLoading('查詢會員資料中…');
+  gasGet({action:'search', phone:phone, socialName:socialName, name:name}).then(function(res){
+    hideLoading();
+    if(!res.success){
+      errorBox.textContent = res.message || '查詢失敗';
+      errorBox.style.display = '';
+      return;
+    }
+
+    state.member = res.member;
+    state.pendingOrders = res.pendingOrders || [];
+    if(res.shippingConfig){ state.shippingConfig = res.shippingConfig; }
+    if(res.resolvedPhone && !phone){
+      document.getElementById('custPhone').value = res.resolvedPhone;
+    }
+
+    renderMemberCard();
+    renderPendingList();
+
+    document.getElementById('toggleManual').style.display = '';
+    document.getElementById('toggleManual').textContent = state.pendingOrders.length ? '找不到我要的訂單／自行填寫' : '自行填寫訂單金額';
+    document.getElementById('step1Next').style.display = '';
+
+    if(state.pendingOrders.length === 0){
+      state.useManualEntry = true;
+      document.getElementById('manualEntry').style.display = '';
+    }
+
+    if(state.member.credit > 0){
+      document.getElementById('creditBox').style.display = '';
+    }
+  }).catch(function(){
+    hideLoading();
+    errorBox.textContent = '查詢失敗，請確認網路連線後再試一次';
+    errorBox.style.display = '';
+  });
+});
+
+function renderMemberCard(){
+  var m = state.member;
+  var box = document.getElementById('memberCardBox');
+  if(m.isNew){
+    box.innerHTML = '<div class="member-card"><span class="tier-badge">新會員</span>' +
+      '<div class="hint">首次登記，完成這筆訂單後即可開始累積購物金</div></div>';
+    return;
+  }
+  box.innerHTML =
+    '<div class="member-card">' +
+      '<span class="tier-badge">' + escapeHtml(m.tier || '一般會員') + '</span>' +
+      (m.socialName ? '<div class="hint">社群名稱：' + escapeHtml(m.socialName) + '</div>' : '') +
+      '<div class="stat-row"><span>累計消費</span><b>NT$ ' + Number(m.totalSpend).toLocaleString() + '</b></div>' +
+      '<div class="stat-row"><span>購物金餘額</span><b>NT$ ' + Number(m.credit).toLocaleString() + '</b></div>' +
+    '</div>';
+}
+
+function renderPendingList(){
+  var box = document.getElementById('pendingBox');
+  var list = document.getElementById('pendingList');
+  if(!state.pendingOrders.length){
+    box.style.display = 'none';
+    return;
+  }
+  box.style.display = '';
+  list.innerHTML = '';
+  state.pendingOrders.forEach(function(p, i){
+    var el = document.createElement('div');
+    el.className = 'pending-item';
+    el.innerHTML = '<div class="src">' + escapeHtml(String(p.source || '')) + '</div>' +
+      '<div>' + escapeHtml(String(p.items || '')) + '</div>' +
+      '<div class="amt">NT$ ' + escapeHtml(String(p.amount || 0)) + '</div>';
+    el.addEventListener('click', function(){
+      document.querySelectorAll('.pending-item').forEach(function(x){ x.classList.remove('selected'); });
+      el.classList.add('selected');
+      state.selectedPending = p;
+      state.useManualEntry = false;
+      document.getElementById('manualEntry').style.display = 'none';
+    });
+    list.appendChild(el);
+  });
+}
+
+document.getElementById('toggleManual').addEventListener('click', function(){
+  var manualBox = document.getElementById('manualEntry');
+  var showing = manualBox.style.display !== 'none';
+  manualBox.style.display = showing ? 'none' : '';
+  state.useManualEntry = !showing;
+  if(!showing){
+    document.querySelectorAll('.pending-item').forEach(function(x){ x.classList.remove('selected'); });
+    state.selectedPending = null;
+  }
+});
+
+// ---------- STEP 2 ----------
+document.querySelectorAll('#payMethodGroup input, #proofTypeGroup input, #shipMethodGroup input').forEach(function(input){
+  input.addEventListener('change', function(){
+    var group = input.closest('.choice-group');
+    group.querySelectorAll('.choice').forEach(function(c){ c.classList.remove('selected'); });
+    input.closest('.choice').classList.add('selected');
+
+    if(input.name === 'proofType'){
+      document.getElementById('proofScreenshot').style.display = (input.value === '截圖') ? '' : 'none';
+      document.getElementById('proofCode').style.display = (input.value === '末碼') ? '' : 'none';
+    }
+    if(input.name === 'payMethod'){
+      document.getElementById('proofSection').style.display = (input.value === '購物金全額折抵') ? 'none' : '';
+    }
+  });
+});
+
+document.getElementById('fileDrop').addEventListener('click', function(){ document.getElementById('fileInput').click(); });
+document.getElementById('fileInput').addEventListener('change', function(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(evt){
+    state.screenshotBase64 = evt.target.result;
+    state.screenshotFileName = file.name;
+    document.getElementById('fileDrop').textContent = '已選擇：' + file.name;
+    document.getElementById('fileDrop').classList.add('has-file');
+    var preview = document.getElementById('filePreview');
+    preview.src = evt.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+function validateStep2AndNext(){
+  var payMethod = document.querySelector('input[name=payMethod]:checked');
+  if(!payMethod){ alert('請選擇付款方式'); return; }
+
+  if(payMethod.value !== '購物金全額折抵'){
+    var proofType = document.querySelector('input[name=proofType]:checked');
+    if(!proofType){ alert('請選擇要提供的付款證明方式'); return; }
+    if(proofType.value === '截圖' && !state.screenshotBase64){ alert('請上傳付款截圖'); return; }
+    if(proofType.value === '末碼' && !document.getElementById('proofValue').value.trim()){ alert('請輸入末碼'); return; }
+  }
+  goStep(3);
+}
+
+// ---------- STEP 3 ----------
+document.getElementById('reuseAddress').addEventListener('change', function(){
+  document.getElementById('shipFields').style.display = this.checked ? 'none' : '';
+});
+document.querySelectorAll('#shipMethodGroup input').forEach(function(input){
+  input.addEventListener('change', function(){
+    var isStore = input.value.indexOf('超商') > -1;
+    document.getElementById('addressLabel').textContent = isStore ? '取貨門市' : '完整地址';
+    document.getElementById('storeCodeField').style.display = isStore ? '' : 'none';
+    document.getElementById('recipientEmailField').style.display = isStore ? '' : 'none';
+    updateFeeDisplay();
+  });
+});
+
+function updateFeeDisplay(){
+  var selected = document.querySelector('input[name=shipMethod]:checked');
+  var box = document.getElementById('feeBox');
+  if(!selected){ box.style.display = 'none'; return; }
+  var order = getOrderItemsAndAmount();
+  var fee = computeShippingFee(selected.value, order.amount);
+  box.style.display = '';
+  document.getElementById('feeItemAmount').textContent = order.amount;
+  document.getElementById('feeShipping').textContent = fee === 0 ? '免運 🎉' : ('NT$ ' + fee);
+  document.getElementById('feeTotal').textContent = order.amount + fee;
+}
+
+function getOrderItemsAndAmount(){
+  if(state.useManualEntry || !state.selectedPending){
+    return {
+      source: document.getElementById('manualSource').value.trim(),
+      items: document.getElementById('manualItems').value.trim(),
+      amount: Number(document.getElementById('manualAmount').value.trim()) || 0,
+      pendingRowNumber: null
+    };
+  }
+  return {
+    source: state.selectedPending.source,
+    items: state.selectedPending.items,
+    amount: Number(state.selectedPending.amount) || 0,
+    pendingRowNumber: state.selectedPending.rowNumber
+  };
+}
+
+function showSummary(){
+  var shipMethodInput = document.querySelector('input[name=shipMethod]:checked');
+  if(!shipMethodInput){ alert('請選擇配送方式'); return; }
+  var shipMethod = shipMethodInput.value;
+
+  var reuse = document.getElementById('reuseAddress').checked;
+  if(!reuse){
+    if(!document.getElementById('recipientName').value.trim() ||
+       !document.getElementById('recipientPhone').value.trim() ||
+       !document.getElementById('addressOrStore').value.trim()){
+      alert('請完整填寫收件資訊'); return;
+    }
+  }
+
+  var order = getOrderItemsAndAmount();
+  var shippingFee = computeShippingFee(shipMethod, order.amount);
+  var orderTotal = order.amount + shippingFee;
+  var useCredit = Math.min(Number(document.getElementById('useCredit').value) || 0, state.member.credit, orderTotal);
+  var actualPaid = orderTotal - useCredit;
+
+  var payMethod = document.querySelector('input[name=payMethod]:checked').value;
+
+  var html = '';
+  html += row('姓名', document.getElementById('custName').value.trim());
+  html += row('來源／梯次', order.source || '—');
+  html += row('品項', order.items || '—');
+  html += row('商品金額', 'NT$ ' + order.amount);
+  html += row('運費', shippingFee === 0 ? '免運' : ('NT$ ' + shippingFee));
+  html += row('應付總額', 'NT$ ' + orderTotal);
+  if(useCredit > 0){ html += row('使用購物金折抵', 'NT$ ' + useCredit); }
+  html += row('實付金額', 'NT$ ' + actualPaid);
+  html += row('付款方式', payMethod);
+  if(payMethod !== '購物金全額折抵'){
+    var proofType = document.querySelector('input[name=proofType]:checked').value;
+    html += row('付款證明', proofType === '截圖' ? '已上傳截圖' : ('末碼：' + document.getElementById('proofValue').value.trim()));
+  }
+  html += row('配送方式', shipMethod + (reuse ? '（沿用先前收件資料）' : ''));
+  if(!reuse){
+    html += row('收件人', document.getElementById('recipientName').value.trim() + '／' + document.getElementById('recipientPhone').value.trim());
+    html += row('地址／門市', document.getElementById('addressOrStore').value.trim());
+  }
+  var note = document.getElementById('note').value.trim();
+  if(note){ html += row('備註', note); }
+
+  document.getElementById('summaryBox').innerHTML = html;
+  goStep(4);
+}
+
+function row(label, value){
+  return '<dt>' + label + '</dt><dd>' + escapeHtml(String(value)) + '</dd>';
+}
+
+// ---------- STEP 4：送出 ----------
+function submitAll(){
+  if(!document.getElementById('custPhone').value.trim()){
+    alert('缺少電話資料，請返回第一步重新查詢');
+    return;
+  }
+  var submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  showLoading('送出回報中…');
+
+  var payMethod = document.querySelector('input[name=payMethod]:checked').value;
+  var isCreditOnly = payMethod === '購物金全額折抵';
+  var proofType = isCreditOnly ? '' : document.querySelector('input[name=proofType]:checked').value;
+
+  var doSubmit = function(screenshotUrl){
+    var reuse = document.getElementById('reuseAddress').checked;
+    var order = getOrderItemsAndAmount();
+    var shipMethod = document.querySelector('input[name=shipMethod]:checked').value;
+    var shippingFee = computeShippingFee(shipMethod, order.amount);
+    var orderTotal = order.amount + shippingFee;
+    var useCredit = Math.min(Number(document.getElementById('useCredit').value) || 0, state.member.credit, orderTotal);
+
+    var payload = {
+      name: document.getElementById('custName').value.trim(),
+      phone: document.getElementById('custPhone').value.trim(),
+      socialName: document.getElementById('custSocialName').value.trim(),
+      source: order.source,
+      items: order.items,
+      amount: order.amount,
+      useCredit: useCredit,
+      pendingRowNumber: order.pendingRowNumber,
+      payMethod: payMethod,
+      proofType: proofType,
+      proofValue: proofType === '末碼' ? document.getElementById('proofValue').value.trim() : '',
+      screenshotUrl: screenshotUrl || '',
+      shipMethod: shipMethod,
+      reuseAddress: reuse,
+      recipientName: reuse ? '' : document.getElementById('recipientName').value.trim(),
+      recipientPhone: reuse ? '' : document.getElementById('recipientPhone').value.trim(),
+      addressOrStore: reuse ? '' : document.getElementById('addressOrStore').value.trim(),
+      storeCode: reuse ? '' : document.getElementById('storeCode').value.trim(),
+      recipientEmail: reuse ? '' : document.getElementById('recipientEmail').value.trim(),
+      note: document.getElementById('note').value.trim()
+    };
+
+    gasGet({action:'submit', data: JSON.stringify(payload)}).then(function(res){
+      hideLoading();
+      if(res.success){
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('successScreen').style.display = '';
+        document.getElementById('cashbackBox').innerHTML =
+          '應付總額 NT$ ' + res.orderTotal + '（含運費 NT$ ' + res.shippingFee + '）<br>' +
+          '本次獲得回饋金 <b>NT$ ' + res.cashbackEarned + '</b><br>' +
+          '購物金餘額 <b>NT$ ' + res.newCreditBalance + '</b>　目前等級：' + escapeHtml(res.newTier);
+        window.scrollTo({top:0, behavior:'smooth'});
+      } else {
+        submitBtn.disabled = false;
+        alert('送出失敗：' + (res.message || '請稍後再試'));
+      }
+    }).catch(function(){
+      hideLoading();
+      submitBtn.disabled = false;
+      alert('送出失敗，請確認網路連線後再試一次');
+    });
+  };
+
+  if(proofType === '截圖' && state.screenshotBase64){
+    gasPostImage({
+      fileName: state.screenshotFileName,
+      mimeType: state.screenshotBase64.split(';')[0].split(':')[1],
+      base64: state.screenshotBase64
+    }).then(function(res){
+      if(res.success){ doSubmit(res.fileUrl); }
+      else { hideLoading(); submitBtn.disabled = false; alert('截圖上傳失敗：' + (res.message || '請稍後再試')); }
+    }).catch(function(){
+      hideLoading(); submitBtn.disabled = false; alert('截圖上傳失敗，請確認網路連線後再試一次');
+    });
+  } else {
+    doSubmit('');
+  }
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+</script>
+
+</body>
+</html>
