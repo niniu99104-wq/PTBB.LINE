@@ -96,6 +96,18 @@
   .pending-item .src{ font-size:11px; color:var(--accent); font-weight:700; }
   .pending-item .amt{ font-family:"Noto Serif TC", serif; font-size:18px; font-weight:700; color:var(--primary-dark); margin-top:2px; }
 
+  .history-list{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .history-item{ border:1px solid var(--line); border-radius:10px; padding:12px 14px; font-size:13px; cursor:pointer; }
+  .history-item .top-row{ display:flex; justify-content:space-between; align-items:center; }
+  .history-item .src{ font-size:11px; color:var(--muted); }
+  .status-pill{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; color:#fff; background:var(--accent); }
+  .status-pill.status-pending{ background:#C9A96A; }
+  .status-pill.status-shipped{ background:var(--accent); }
+  .status-pill.status-done{ background:#8A9A7E; }
+  .status-pill.status-refund{ background:var(--danger); }
+  .history-detail{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:12.5px; color:var(--muted); display:none; }
+  .history-item.open .history-detail{ display:block; }
+
   .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
   .error-text{ font-size:13px; color:var(--danger); margin-top:8px; }
 
@@ -121,6 +133,31 @@
   .loading-mask.show{ display:flex; }
   .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--primary); animation:spin 0.8s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ===== 出貨後台專用樣式 ===== */
+  .admin-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
+  .admin-toolbar select{ padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; }
+  .admin-table-scroll{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:13px; }
+  th, td{ padding:9px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  th{ background:#F1EAD9; color:var(--muted); font-weight:700; }
+  tr:hover td{ background:#FBF6EE; }
+  .missing{ color:var(--danger); font-weight:700; }
+  .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:var(--accent); color:#fff; }
+  .admin-empty{ text-align:center; padding:40px; color:var(--muted); }
+  .admin-footer-bar{ position:sticky; bottom:0; background:var(--bg); padding:14px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .admin-footer-bar select{ padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; }
+  #adminView .btn{ width:auto; }
+
+  .admin-tabs{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line); }
+  .tab-btn{
+    padding:9px 16px; border:none; background:none; font-size:14px; font-family:inherit;
+    color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  .tab-btn.active{ color:var(--primary-dark); border-bottom-color:var(--primary); font-weight:700; }
+  .admin-tab-panel table input{ width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-size:13px; }
+  .allocated-yes{ color:var(--accent); font-weight:700; }
+  .allocated-no{ color:var(--danger); font-weight:700; }
 </style>
 </head>
 <body>
@@ -130,7 +167,7 @@
   <div id="loadingText">處理中，請稍候…</div>
 </div>
 
-<div class="wrap">
+<div class="wrap" id="customerView">
   <header class="brand">
     <div class="mark">🥜 Peanut Bebe ｜豆媽選品</div>
     <h1>會員回報系統</h1>
@@ -143,50 +180,43 @@
 
   <form id="checkoutForm">
 
-    <!-- STEP 1：查詢會員 + 選訂單 -->
+    <!-- STEP 1：會員登入 -->
     <div class="card step" data-step="1">
       <div class="step-label">STEP 1</div>
-      <div class="step-title">查詢會員資料</div>
+      <div class="step-title">會員登入</div>
 
       <div class="field">
-        <label for="custPhone">電話（會員識別，之後查詢也用這組）</label>
-        <input type="tel" id="custPhone" placeholder="手機號碼">
-      </div>
-      <div class="field">
-        <label for="custSocialName">社群名稱／暱稱（選填，忘記電話時可以用這個查）</label>
-        <input type="text" id="custSocialName" placeholder="例如：LINE暱稱、IG帳號">
-        <div class="hint">第一次登記時填寫，之後也能單獨用這個查詢會員資料</div>
+        <label for="custPhone">電話</label>
+        <input type="tel" id="custPhone" required placeholder="手機號碼">
       </div>
       <div class="field">
         <label for="custName">姓名</label>
         <input type="text" id="custName" required placeholder="您的稱呼">
       </div>
+      <div class="field">
+        <label for="custSocialName">社群名稱／暱稱（選填）</label>
+        <input type="text" id="custSocialName" placeholder="例如：LINE暱稱、IG帳號">
+      </div>
 
-      <button type="button" class="btn btn-primary" id="searchBtn">查詢會員與訂單</button>
+      <button type="button" class="btn btn-primary" id="searchBtn">登入查詢</button>
       <div id="searchError" class="error-text" style="display:none;"></div>
 
       <div id="memberCardBox"></div>
 
       <div id="pendingBox" style="display:none;">
-        <div class="hint" style="margin-top:14px;">找到以下待確認訂單，請點選要回報的那筆：</div>
+        <div class="hint" style="margin-top:14px;">待付款訂單，點選要付款的那筆：</div>
         <div class="pending-list" id="pendingList"></div>
       </div>
+      <div id="noPendingMsg" class="hint" style="display:none; margin-top:14px;">目前沒有待付款的訂單</div>
 
-      <button type="button" class="link-btn" id="toggleManual" style="display:none;"></button>
+      <div id="orderHistoryBox" style="display:none; margin-top:20px;">
+        <div class="hint">我的訂單紀錄：</div>
+        <div class="history-list" id="historyList"></div>
+      </div>
 
-      <div id="manualEntry" style="display:none;">
-        <div class="field" style="margin-top:14px;">
-          <label for="manualSource">來源／梯次</label>
-          <input type="text" id="manualSource" placeholder="例如：2026年7月團、官網訂單">
-        </div>
-        <div class="field">
-          <label for="manualItems">品項</label>
-          <input type="text" id="manualItems" placeholder="例如：MOYUUM 奶嘴 x2">
-        </div>
-        <div class="field">
-          <label for="manualAmount">應付金額</label>
-          <input type="text" id="manualAmount" placeholder="例如：850" inputmode="numeric">
-        </div>
+      <div id="creditLedgerBox" style="display:none; margin-top:20px;">
+        <div class="hint">我的購物金紀錄：</div>
+        <div class="history-list" id="creditLedgerList"></div>
       </div>
 
       <div id="creditBox" style="display:none;">
@@ -198,7 +228,7 @@
       </div>
 
       <div class="btn-row" id="step1Next" style="display:none;">
-        <button type="button" class="btn btn-primary" onclick="goStep(2)">下一步</button>
+        <button type="button" class="btn btn-primary" onclick="goToPayment()">前往付款</button>
       </div>
     </div>
 
@@ -318,17 +348,154 @@
     <p>已收到您的付款與配送資訊，會依照對帳進度為您安排出貨 ❤️</p>
     <div class="cashback-box" id="cashbackBox"></div>
   </div>
+
+  <div style="text-align:center; margin-top:36px;">
+    <a href="javascript:void(0)" onclick="showAdminLogin()" style="font-size:11px; color:#D9CBB6; text-decoration:none;">賣家登入</a>
+  </div>
+</div>
+
+<!-- ===================== 出貨後台（僅賣家使用） ===================== -->
+<div class="wrap" id="adminView" style="display:none; max-width:960px;">
+
+  <div id="loginScreen" class="card" style="max-width:340px; margin:60px auto;">
+    <div class="step-title">出貨後台登入</div>
+    <div class="field"><input type="password" id="adminCode" placeholder="請輸入管理密碼"></div>
+    <button class="btn btn-primary" style="width:100%;" onclick="adminLogin()">登入</button>
+    <div id="loginError" class="error-text"></div>
+    <div style="text-align:center; margin-top:14px;">
+      <a href="javascript:void(0)" onclick="backToCustomerView()" style="font-size:12px; color:var(--muted);">回到訂單回報表單</a>
+    </div>
+  </div>
+
+  <div id="mainScreen" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+      <div class="step-title" style="margin:0;">🥜 出貨後台</div>
+      <a href="javascript:void(0)" onclick="backToCustomerView()" style="font-size:12px; color:var(--muted);">回到訂單回報表單</a>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="showAdminTab('orders', this)">訂單管理</button>
+      <button class="tab-btn" onclick="showAdminTab('create', this)">建立訂單</button>
+      <button class="tab-btn" onclick="showAdminTab('summary', this)">叫貨與配貨</button>
+    </div>
+
+    <!-- 分頁：訂單管理 -->
+    <div id="adminTab-orders" class="admin-tab-panel">
+      <div class="admin-toolbar">
+        <select id="statusFilter" onchange="loadOrders()">
+          <option value="進行中">進行中（不含已完成）</option>
+          <option value="全部">全部狀態</option>
+          <option value="確認中">確認中</option>
+          <option value="已收到款項">已收到款項</option>
+          <option value="待出貨">待出貨</option>
+          <option value="已出貨">已出貨</option>
+          <option value="商品斷貨退款（退回購物金）">商品斷貨退款（退回購物金）</option>
+          <option value="訂單完成">訂單完成</option>
+        </select>
+        <select id="shipFilter" onchange="loadOrders()">
+          <option value="全部">全部配送方式</option>
+          <option value="宅配">宅配</option>
+          <option value="超商">超商取貨</option>
+        </select>
+        <button class="btn btn-ghost" onclick="loadOrders()">重新整理</button>
+        <span class="hint" id="statusText"></span>
+      </div>
+
+      <div class="admin-table-scroll">
+        <table id="orderTable" style="display:none;">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+              <th>訂單編號</th><th>狀態</th><th>姓名</th><th>社群名稱</th><th>電話</th><th>品項</th><th>商品金額</th><th>運費</th><th>實付</th>
+              <th>配送方式</th><th>收件人</th><th>地址/門市</th><th>店號</th><th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="orderBody"></tbody>
+        </table>
+        <div class="admin-empty" id="emptyState">目前沒有待出貨的訂單</div>
+      </div>
+
+      <div class="admin-footer-bar">
+        <span class="hint">已勾選 <b id="selectedCount">0</b> 筆</span>
+        <select id="serviceCode">
+          <option value="2">常溫取貨不付款-一般材積</option>
+          <option value="3">常溫取貨不付款-120cm</option>
+          <option value="4">常溫取貨不付款-經濟交貨便</option>
+        </select>
+        <button class="btn btn-primary" id="exportSevenBtn" onclick="exportSeven()">匯出 7-11 交貨便格式</button>
+        <button class="btn btn-primary" id="exportHCTBtn" onclick="exportHCT()">匯出新竹物流 HCT 格式</button>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        ⚠️ 匯出後該筆訂單狀態會自動改為「已出貨」；匯出 HCT 時請只勾選「宅配」的訂單。若欄位顯示紅字代表資料不齊全，建議匯出後在下載的檔案中手動補上。狀態選單可隨時手動調整，選到「商品斷貨退款」會立即把該筆金額退回會員購物金，此動作無法復原請小心操作。
+      </div>
+    </div>
+
+    <!-- 分頁：建立訂單 -->
+    <div id="adminTab-create" class="admin-tab-panel" style="display:none;">
+      <div class="card">
+        <div class="field"><label>電話</label><input type="tel" id="newOrderPhone"></div>
+        <div class="field"><label>姓名</label><input type="text" id="newOrderName"></div>
+        <div class="field">
+          <label>團別</label>
+          <div style="display:flex; gap:8px;">
+            <select id="newOrderSource" style="flex:1;"></select>
+            <button type="button" class="btn btn-ghost" onclick="promptAddGroup()">＋新增團別</button>
+          </div>
+        </div>
+
+        <div class="hint" style="margin-top:14px;">品項（折扣／補差價請用「[優惠]」或「[調整]」開頭，單價可打負數）</div>
+        <table style="margin-top:8px;">
+          <thead><tr><th>品名</th><th>數量</th><th>單價</th><th>小計</th><th></th></tr></thead>
+          <tbody id="newOrderItemsBody"></tbody>
+        </table>
+        <button type="button" class="btn btn-ghost" style="margin-top:10px;" onclick="addNewOrderItemRow()">＋ 新增一列品項</button>
+
+        <div class="hint" style="margin-top:14px;">應付總額：NT$ <b id="newOrderTotal">0</b></div>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-primary" id="createOrderBtn" onclick="createOrder()">建立訂單</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 分頁：叫貨與配貨 -->
+    <div id="adminTab-summary" class="admin-tab-panel" style="display:none;">
+      <div class="card">
+        <div class="step-title" style="font-size:15px;">登記到貨</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+          <div class="field" style="flex:1; min-width:140px;"><label>團別</label><select id="arrivalSource"></select></div>
+          <div class="field" style="flex:1; min-width:140px;"><label>品項</label><input type="text" id="arrivalItem" placeholder="品項名稱"></div>
+          <div class="field" style="width:100px;"><label>到貨數量</label><input type="number" id="arrivalQty" min="0"></div>
+          <button type="button" class="btn btn-primary" onclick="addArrival()" style="margin-bottom:14px;">登記到貨</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field"><label>團別</label><select id="summarySource"></select></div>
+        <button type="button" class="btn btn-primary" onclick="loadItemSummary()">統計本梯次品項需求量</button>
+
+        <div class="admin-table-scroll" style="margin-top:14px;">
+          <table id="summaryTable" style="display:none;">
+            <thead><tr><th>品項</th><th>總需求量</th><th>已確認</th><th>已配貨</th><th>到貨數量</th><th>可配新庫存</th><th></th></tr></thead>
+            <tbody id="summaryBody"></tbody>
+          </table>
+          <div class="admin-empty" id="summaryEmpty" style="display:none;">這個團別目前沒有品項資料</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 // ⚠️ 部署完成後，請把下面這行換成您的 GAS 網頁應用程式網址
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbymIooSb6VQ2WlIz-7c_0__wtos-UUe_1JUa198LJeAVjHIudZ4YXk7yYhXoxoV-YKn/exec';
+var GAS_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
 var state = {
   member: null,
   pendingOrders: [],
+  orderHistory: [],
+  creditLedger: [],
   selectedPending: null,
-  useManualEntry: false,
   screenshotBase64: null,
   screenshotFileName: null,
   shippingConfig: { storeThreshold: 1500, storeFee: 60, homeThreshold: 2000, homeFee: 100 }
@@ -387,18 +554,13 @@ document.getElementById('searchBtn').addEventListener('click', function(){
   var errorBox = document.getElementById('searchError');
   errorBox.style.display = 'none';
 
-  if(!name){
-    errorBox.textContent = '請填寫姓名';
-    errorBox.style.display = '';
-    return;
-  }
-  if(!phone && !socialName){
-    errorBox.textContent = '請至少填寫電話或社群名稱其中一項';
+  if(!phone || !name){
+    errorBox.textContent = '請填寫電話與姓名';
     errorBox.style.display = '';
     return;
   }
 
-  showLoading('查詢會員資料中…');
+  showLoading('登入查詢中…');
   gasGet({action:'search', phone:phone, socialName:socialName, name:name}).then(function(res){
     hideLoading();
     if(!res.success){
@@ -409,22 +571,14 @@ document.getElementById('searchBtn').addEventListener('click', function(){
 
     state.member = res.member;
     state.pendingOrders = res.pendingOrders || [];
+    state.orderHistory = res.orderHistory || [];
+    state.creditLedger = res.creditLedger || [];
     if(res.shippingConfig){ state.shippingConfig = res.shippingConfig; }
-    if(res.resolvedPhone && !phone){
-      document.getElementById('custPhone').value = res.resolvedPhone;
-    }
 
     renderMemberCard();
     renderPendingList();
-
-    document.getElementById('toggleManual').style.display = '';
-    document.getElementById('toggleManual').textContent = state.pendingOrders.length ? '找不到我要的訂單／自行填寫' : '自行填寫訂單金額';
-    document.getElementById('step1Next').style.display = '';
-
-    if(state.pendingOrders.length === 0){
-      state.useManualEntry = true;
-      document.getElementById('manualEntry').style.display = '';
-    }
+    renderOrderHistory();
+    renderCreditLedger();
 
     if(state.member.credit > 0){
       document.getElementById('creditBox').style.display = '';
@@ -453,42 +607,122 @@ function renderMemberCard(){
     '</div>';
 }
 
+function formatItemsDisplay(items){
+  return items
+    .filter(function(it){ return String(it.name).indexOf('[優惠]') !== 0 && String(it.name).indexOf('[調整]') !== 0; })
+    .map(function(it){ return it.name + (it.qty > 1 ? ' x' + it.qty : ''); })
+    .join('、');
+}
+
 function renderPendingList(){
   var box = document.getElementById('pendingBox');
   var list = document.getElementById('pendingList');
+  var noMsg = document.getElementById('noPendingMsg');
+  document.getElementById('step1Next').style.display = 'none';
+  state.selectedPending = null;
+
   if(!state.pendingOrders.length){
     box.style.display = 'none';
+    noMsg.style.display = '';
     return;
   }
+  noMsg.style.display = 'none';
   box.style.display = '';
   list.innerHTML = '';
-  state.pendingOrders.forEach(function(p, i){
+  state.pendingOrders.forEach(function(p){
     var el = document.createElement('div');
     el.className = 'pending-item';
     el.innerHTML = '<div class="src">' + escapeHtml(String(p.source || '')) + '</div>' +
-      '<div>' + escapeHtml(String(p.items || '')) + '</div>' +
+      '<div>' + escapeHtml(formatItemsDisplay(p.items || [])) + '</div>' +
       '<div class="amt">NT$ ' + escapeHtml(String(p.amount || 0)) + '</div>';
     el.addEventListener('click', function(){
       document.querySelectorAll('.pending-item').forEach(function(x){ x.classList.remove('selected'); });
       el.classList.add('selected');
       state.selectedPending = p;
-      state.useManualEntry = false;
-      document.getElementById('manualEntry').style.display = 'none';
+      document.getElementById('step1Next').style.display = '';
     });
     list.appendChild(el);
   });
 }
 
-document.getElementById('toggleManual').addEventListener('click', function(){
-  var manualBox = document.getElementById('manualEntry');
-  var showing = manualBox.style.display !== 'none';
-  manualBox.style.display = showing ? 'none' : '';
-  state.useManualEntry = !showing;
-  if(!showing){
-    document.querySelectorAll('.pending-item').forEach(function(x){ x.classList.remove('selected'); });
-    state.selectedPending = null;
+function goToPayment(){
+  if(!state.selectedPending){ alert('請先點選要付款的訂單'); return; }
+  goStep(2);
+}
+
+function statusPillClass(status){
+  if(status === '訂單完成') return 'status-done';
+  if(status === '商品斷貨退款（退回購物金）') return 'status-refund';
+  if(status === '已出貨') return 'status-shipped';
+  return 'status-pending';
+}
+
+function renderOrderHistory(){
+  var box = document.getElementById('orderHistoryBox');
+  var list = document.getElementById('historyList');
+  if(!state.orderHistory.length){
+    box.style.display = 'none';
+    return;
   }
-});
+  box.style.display = '';
+  list.innerHTML = '';
+  state.orderHistory.forEach(function(o, i){
+    var el = document.createElement('div');
+    el.className = 'history-item';
+
+    var itemRows = (o.itemDetails || [])
+      .filter(function(it){ return String(it.name).indexOf('[優惠]') !== 0 && String(it.name).indexOf('[調整]') !== 0; })
+      .map(function(it){
+        var isDelivered = it.deliveryStatus === '已配貨';
+        return '<div style="display:flex; justify-content:space-between; margin-top:4px;">' +
+          '<span>' + escapeHtml(it.name) + (it.qty > 1 ? ' x' + it.qty : '') + '</span>' +
+          '<span class="status-pill ' + (isDelivered ? 'status-done' : 'status-pending') + '" style="font-size:10px;">' + (isDelivered ? '已配貨' : '未配貨') + '</span>' +
+        '</div>';
+      }).join('');
+
+    el.innerHTML =
+      '<div class="top-row">' +
+        '<div><div class="src">' + escapeHtml(String(o.source || '')) + '</div>' + escapeHtml(String(o.items || '')) + '</div>' +
+        '<span class="status-pill ' + statusPillClass(o.status) + '">' + escapeHtml(String(o.status || '')) + '</span>' +
+      '</div>' +
+      '<div class="history-detail">' +
+        '訂單編號：' + escapeHtml(String(o.orderId || '')) + '<br>' +
+        '商品金額：NT$ ' + o.itemAmount + '　運費：' + (o.shippingFee ? ('NT$ ' + o.shippingFee) : '免運') + '<br>' +
+        '實付金額：NT$ ' + o.amount + '<br>' +
+        '配送方式：' + escapeHtml(String(o.shipMethod || '')) +
+        '<div style="margin-top:8px; padding-top:8px; border-top:1px dashed var(--line);">品項配貨狀態：' + itemRows + '</div>' +
+      '</div>';
+    el.addEventListener('click', function(){
+      el.classList.toggle('open');
+    });
+    list.appendChild(el);
+  });
+}
+
+function renderCreditLedger(){
+  var box = document.getElementById('creditLedgerBox');
+  var list = document.getElementById('creditLedgerList');
+  if(!state.creditLedger.length){
+    box.style.display = 'none';
+    return;
+  }
+  box.style.display = '';
+  list.innerHTML = '';
+  state.creditLedger.forEach(function(l){
+    var el = document.createElement('div');
+    el.className = 'history-item';
+    el.style.cursor = 'default';
+    var positive = l.amount >= 0;
+    el.innerHTML =
+      '<div class="top-row">' +
+        '<div><div class="src">' + escapeHtml(String(l.reason || '')) + (l.orderId ? '　' + escapeHtml(String(l.orderId)) : '') + '</div>' +
+        '<span style="font-size:11px; color:var(--muted);">' + escapeHtml(String(l.time || '')) + '</span></div>' +
+        '<span style="font-family:\'Noto Serif TC\',serif; font-weight:700; color:' + (positive ? 'var(--accent)' : 'var(--danger)') + ';">' +
+          (positive ? '+' : '') + l.amount + '</span>' +
+      '</div>';
+    list.appendChild(el);
+  });
+}
 
 // ---------- STEP 2 ----------
 document.querySelectorAll('#payMethodGroup input, #proofTypeGroup input, #shipMethodGroup input').forEach(function(input){
@@ -564,19 +798,14 @@ function updateFeeDisplay(){
 }
 
 function getOrderItemsAndAmount(){
-  if(state.useManualEntry || !state.selectedPending){
-    return {
-      source: document.getElementById('manualSource').value.trim(),
-      items: document.getElementById('manualItems').value.trim(),
-      amount: Number(document.getElementById('manualAmount').value.trim()) || 0,
-      pendingRowNumber: null
-    };
+  if(!state.selectedPending){
+    return { source: '', items: '', amount: 0, orderKey: null };
   }
   return {
     source: state.selectedPending.source,
-    items: state.selectedPending.items,
+    items: formatItemsDisplay(state.selectedPending.items || []),
     amount: Number(state.selectedPending.amount) || 0,
-    pendingRowNumber: state.selectedPending.rowNumber
+    orderKey: state.selectedPending.orderKey
   };
 }
 
@@ -604,7 +833,7 @@ function showSummary(){
 
   var html = '';
   html += row('姓名', document.getElementById('custName').value.trim());
-  html += row('來源／梯次', order.source || '—');
+  html += row('團別', order.source || '—');
   html += row('品項', order.items || '—');
   html += row('商品金額', 'NT$ ' + order.amount);
   html += row('運費', shippingFee === 0 ? '免運' : ('NT$ ' + shippingFee));
@@ -658,11 +887,8 @@ function submitAll(){
       name: document.getElementById('custName').value.trim(),
       phone: document.getElementById('custPhone').value.trim(),
       socialName: document.getElementById('custSocialName').value.trim(),
-      source: order.source,
-      items: order.items,
-      amount: order.amount,
+      orderKey: order.orderKey,
       useCredit: useCredit,
-      pendingRowNumber: order.pendingRowNumber,
       payMethod: payMethod,
       proofType: proofType,
       proofValue: proofType === '末碼' ? document.getElementById('proofValue').value.trim() : '',
@@ -715,9 +941,351 @@ function submitAll(){
 }
 
 function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, function(c){
+  return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
+}
+
+// ===================== 出貨後台（賣家專用） =====================
+
+var adminCode = '';
+var allOrders = [];
+var ALL_STATUSES = ['確認中', '已收到款項', '待出貨', '已出貨', '商品斷貨退款（退回購物金）', '訂單完成'];
+
+function showAdminLogin(){
+  document.getElementById('customerView').style.display = 'none';
+  document.getElementById('adminView').style.display = '';
+  document.getElementById('loginScreen').style.display = '';
+  document.getElementById('mainScreen').style.display = 'none';
+  window.scrollTo({top:0});
+}
+function backToCustomerView(){
+  document.getElementById('adminView').style.display = 'none';
+  document.getElementById('customerView').style.display = '';
+  window.scrollTo({top:0});
+}
+
+function gasPostAction(action, payload){
+  return fetch(GAS_URL + '?action=' + action, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(function(r){ return r.json(); });
+}
+
+function adminLogin(){
+  var code = document.getElementById('adminCode').value.trim();
+  if(!code){ return; }
+  adminCode = code;
+  document.getElementById('loginError').textContent = '';
+  loadOrders();
+}
+
+function loadOrders(){
+  document.getElementById('statusText').textContent = '載入中…';
+  gasGet({
+    action:'adminList', code: adminCode,
+    shipMethod: document.getElementById('shipFilter').value,
+    status: document.getElementById('statusFilter').value
+  })
+    .then(function(res){
+      if(!res.success){
+        document.getElementById('loginScreen').style.display = '';
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('loginError').textContent = res.message || '密碼錯誤';
+        return;
+      }
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainScreen').style.display = '';
+      allOrders = res.orders || [];
+      renderAdminTable();
+      loadGroupOptions();
+      document.getElementById('statusText').textContent = '共 ' + allOrders.length + ' 筆';
+    })
+    .catch(function(){
+      document.getElementById('statusText').textContent = '載入失敗，請確認網路連線';
+    });
+}
+
+function renderAdminTable(){
+  var table = document.getElementById('orderTable');
+  var empty = document.getElementById('emptyState');
+  var body = document.getElementById('orderBody');
+  body.innerHTML = '';
+
+  if(!allOrders.length){
+    table.style.display = 'none';
+    empty.style.display = '';
+    return;
+  }
+  table.style.display = '';
+  empty.style.display = 'none';
+
+  allOrders.forEach(function(o){
+    var tr = document.createElement('tr');
+    var isStore = String(o.shipMethod).indexOf('超商') > -1;
+    var storeCodeCell = o.storeCode ? escapeHtml(o.storeCode) : (isStore ? '<span class="missing">未填</span>' : '—');
+    var emailCell = o.recipientEmail ? escapeHtml(o.recipientEmail) : (isStore ? '<span class="missing">未填</span>' : '—');
+
+    var statusOptions = ALL_STATUSES.map(function(s){
+      return '<option value="' + escapeHtml(s) + '"' + (s === o.status ? ' selected' : '') + '>' + escapeHtml(s) + '</option>';
+    }).join('');
+
+    tr.innerHTML =
+      '<td><input type="checkbox" class="rowChk" data-row="' + o.rowNumber + '" onchange="updateSelectedCount()"></td>' +
+      '<td>' + escapeHtml(o.orderId) + '</td>' +
+      '<td><select onchange="updateOrderStatus(' + o.rowNumber + ', this.value, this)">' + statusOptions + '</select></td>' +
+      '<td>' + escapeHtml(o.name) + '</td>' +
+      '<td>' + escapeHtml(o.socialName || '—') + '</td>' +
+      '<td>' + escapeHtml(o.phone) + '</td>' +
+      '<td>' + escapeHtml(String(o.items||'')) + '</td>' +
+      '<td>NT$' + o.itemAmount + '</td>' +
+      '<td>' + (o.shippingFee ? ('NT$' + o.shippingFee) : '免運') + '</td>' +
+      '<td>NT$' + o.amount + '</td>' +
+      '<td><span class="badge">' + escapeHtml(String(o.shipMethod||'')) + '</span></td>' +
+      '<td>' + escapeHtml(o.recipientName) + ' ' + escapeHtml(o.recipientPhone) + '</td>' +
+      '<td>' + escapeHtml(String(o.addressOrStore||'')) + '</td>' +
+      '<td>' + storeCodeCell + '</td>' +
+      '<td>' + emailCell + '</td>';
+    body.appendChild(tr);
+  });
+  updateSelectedCount();
+}
+
+function updateOrderStatus(rowNumber, newStatus, selectEl){
+  selectEl.disabled = true;
+  gasPostAction('adminUpdateStatus', { code: adminCode, rowNumber: rowNumber, newStatus: newStatus })
+    .then(function(res){
+      selectEl.disabled = false;
+      if(!res.success){
+        alert('更新失敗：' + (res.message || '請稍後再試'));
+        return;
+      }
+      if(newStatus === '商品斷貨退款（退回購物金）'){
+        alert('已將該筆訂單金額退回會員購物金');
+      }
+      loadOrders();
+    })
+    .catch(function(){
+      selectEl.disabled = false;
+      alert('更新失敗，請確認網路連線');
+    });
+}
+
+function toggleAll(box){
+  document.querySelectorAll('.rowChk').forEach(function(c){ c.checked = box.checked; });
+  updateSelectedCount();
+}
+function updateSelectedCount(){
+  document.getElementById('selectedCount').textContent = document.querySelectorAll('.rowChk:checked').length;
+}
+function getSelectedRowNumbers(){
+  return Array.from(document.querySelectorAll('.rowChk:checked')).map(function(c){ return Number(c.dataset.row); });
+}
+
+function downloadBase64File(base64Data, fileName){
+  var link = document.createElement('a');
+  link.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + base64Data;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportSeven(){
+  var rowNumbers = getSelectedRowNumbers();
+  if(!rowNumbers.length){ alert('請先勾選訂單'); return; }
+  document.getElementById('exportSevenBtn').disabled = true;
+  gasPostAction('exportSeven', {
+    code: adminCode, orderRowNumbers: rowNumbers, serviceCode: document.getElementById('serviceCode').value
+  }).then(function(res){
+    document.getElementById('exportSevenBtn').disabled = false;
+    if(res.success){
+      downloadBase64File(res.fileBase64, res.fileName);
+      loadOrders();
+    } else {
+      alert('匯出失敗：' + (res.message || '請稍後再試'));
+    }
+  }).catch(function(){
+    document.getElementById('exportSevenBtn').disabled = false;
+    alert('匯出失敗，請確認網路連線');
+  });
+}
+
+function exportHCT(){
+  var rowNumbers = getSelectedRowNumbers();
+  if(!rowNumbers.length){ alert('請先勾選訂單'); return; }
+  document.getElementById('exportHCTBtn').disabled = true;
+  gasPostAction('exportHCT', {
+    code: adminCode, orderRowNumbers: rowNumbers
+  }).then(function(res){
+    document.getElementById('exportHCTBtn').disabled = false;
+    if(res.success){
+      downloadBase64File(res.fileBase64, res.fileName);
+      loadOrders();
+    } else {
+      alert('匯出失敗：' + (res.message || '請稍後再試'));
+    }
+  }).catch(function(){
+    document.getElementById('exportHCTBtn').disabled = false;
+    alert('匯出失敗，請確認網路連線');
+  });
+}
+
+// ===================== 後台分頁切換 =====================
+
+function showAdminTab(name, btnEl){
+  ['orders','create','summary'].forEach(function(t){
+    document.getElementById('adminTab-' + t).style.display = (t === name) ? '' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  btnEl.classList.add('active');
+}
+
+// ===================== 建立訂單 =====================
+
+function addNewOrderItemRow(){
+  var tbody = document.getElementById('newOrderItemsBody');
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input type="text" class="itemName" placeholder="品名"></td>' +
+    '<td><input type="number" class="itemQty" value="1" min="0" style="width:60px;"></td>' +
+    '<td><input type="number" class="itemPrice" value="0" style="width:80px;"></td>' +
+    '<td class="itemSubtotal">0</td>' +
+    '<td><button type="button" class="btn btn-ghost" onclick="this.closest(\'tr\').remove(); updateNewOrderTotal();">刪除</button></td>';
+  tr.querySelectorAll('.itemQty, .itemPrice').forEach(function(input){
+    input.addEventListener('input', updateNewOrderTotal);
+  });
+  tbody.appendChild(tr);
+}
+
+function updateNewOrderTotal(){
+  var total = 0;
+  document.querySelectorAll('#newOrderItemsBody tr').forEach(function(tr){
+    var qty = Number(tr.querySelector('.itemQty').value) || 0;
+    var price = Number(tr.querySelector('.itemPrice').value) || 0;
+    var subtotal = qty * price;
+    tr.querySelector('.itemSubtotal').textContent = subtotal;
+    total += subtotal;
+  });
+  document.getElementById('newOrderTotal').textContent = total;
+}
+
+function createOrder(){
+  var phone = document.getElementById('newOrderPhone').value.trim();
+  var name = document.getElementById('newOrderName').value.trim();
+  var source = document.getElementById('newOrderSource').value.trim();
+  if(!phone || !name || !source){ alert('請填寫電話、姓名、團別'); return; }
+
+  var items = [];
+  document.querySelectorAll('#newOrderItemsBody tr').forEach(function(tr){
+    var itemName = tr.querySelector('.itemName').value.trim();
+    if(!itemName) return;
+    items.push({
+      name: itemName,
+      qty: Number(tr.querySelector('.itemQty').value) || 0,
+      price: Number(tr.querySelector('.itemPrice').value) || 0
+    });
+  });
+  if(!items.length){ alert('請至少新增一列品項'); return; }
+
+  document.getElementById('createOrderBtn').disabled = true;
+  gasPostAction('adminCreateOrder', { code: adminCode, phone: phone, name: name, source: source, items: items })
+    .then(function(res){
+      document.getElementById('createOrderBtn').disabled = false;
+      if(res.success){
+        alert('訂單建立成功！識別碼：' + res.orderKey);
+        document.getElementById('newOrderPhone').value = '';
+        document.getElementById('newOrderName').value = '';
+        document.getElementById('newOrderItemsBody').innerHTML = '';
+        addNewOrderItemRow();
+        updateNewOrderTotal();
+      } else {
+        alert('建立失敗：' + (res.message || '請稍後再試'));
+      }
+    })
+    .catch(function(){
+      document.getElementById('createOrderBtn').disabled = false;
+      alert('建立失敗，請確認網路連線');
+    });
+}
+addNewOrderItemRow();
+
+// ===================== 叫貨統計 / 配貨清單 =====================
+
+function loadItemSummary(){
+  var source = document.getElementById('summarySource').value;
+  if(!source){ alert('請選擇團別'); return; }
+
+  gasGet({ action:'adminItemSummary', code: adminCode, source: source }).then(function(res){
+    var table = document.getElementById('summaryTable');
+    var empty = document.getElementById('summaryEmpty');
+    var body = document.getElementById('summaryBody');
+    body.innerHTML = '';
+
+    if(!res.success){ alert(res.message || '統計失敗'); return; }
+    if(!res.items.length){ table.style.display = 'none'; empty.style.display = ''; return; }
+
+    table.style.display = '';
+    empty.style.display = 'none';
+    res.items.forEach(function(it){
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>' + escapeHtml(it.name) + '</td>' +
+        '<td>' + it.totalQty + '</td>' +
+        '<td>' + it.confirmedQty + '</td>' +
+        '<td>' + it.allocatedQty + '</td>' +
+        '<td>' + it.arrivedQty + '</td>' +
+        '<td class="' + (it.availableNew > 0 ? 'allocated-yes' : '') + '">' + it.availableNew + '</td>' +
+        '<td><button type="button" class="btn btn-primary" onclick="allocateItem(\'' + escapeHtml(source).replace(/'/g,"\\'") + '\', \'' + escapeHtml(it.name).replace(/'/g,"\\'") + '\')">一鍵配貨</button></td>';
+      body.appendChild(tr);
+    });
+  }).catch(function(){ alert('統計失敗，請確認網路連線'); });
+}
+
+function allocateItem(source, itemName){
+  gasPostAction('adminAllocate', { code: adminCode, source: source, item: itemName }).then(function(res){
+    if(!res.success){ alert(res.message || '配貨失敗'); return; }
+    alert('本次新配貨 ' + res.newlyAllocated + ' 筆，還在等待的 ' + res.remainingWaiting + ' 筆，剩餘新庫存 ' + res.remainingStock);
+    loadItemSummary();
+  }).catch(function(){ alert('配貨失敗，請確認網路連線'); });
+}
+
+function addArrival(){
+  var source = document.getElementById('arrivalSource').value;
+  var itemName = document.getElementById('arrivalItem').value.trim();
+  var qty = Number(document.getElementById('arrivalQty').value) || 0;
+  if(!source || !itemName || !qty){ alert('請選擇團別、填寫品項與到貨數量'); return; }
+
+  gasPostAction('adminAddArrival', { code: adminCode, source: source, item: itemName, qty: qty }).then(function(res){
+    if(!res.success){ alert(res.message || '登記失敗'); return; }
+    alert('登記成功！');
+    document.getElementById('arrivalItem').value = '';
+    document.getElementById('arrivalQty').value = '';
+  }).catch(function(){ alert('登記失敗，請確認網路連線'); });
+}
+
+// ===================== 團別管理 =====================
+
+function loadGroupOptions(){
+  gasGet({ action:'adminGroupList', code: adminCode }).then(function(res){
+    if(!res.success) return;
+    ['newOrderSource', 'summarySource', 'arrivalSource'].forEach(function(id){
+      var select = document.getElementById(id);
+      var current = select.value;
+      select.innerHTML = res.groups.map(function(g){ return '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>'; }).join('');
+      if(res.groups.indexOf(current) > -1) select.value = current;
+    });
+  });
+}
+
+function promptAddGroup(){
+  var name = prompt('請輸入新團別名稱（例如：2026年8月團）');
+  if(!name || !name.trim()) return;
+  gasPostAction('adminAddGroup', { code: adminCode, name: name.trim() }).then(function(res){
+    if(!res.success){ alert(res.message || '新增失敗'); return; }
+    loadGroupOptions();
+  }).catch(function(){ alert('新增失敗，請確認網路連線'); });
 }
 </script>
 
