@@ -46,12 +46,25 @@
   .step-title{ font-family:"Noto Serif TC", serif; font-size:19px; font-weight:700; margin:0 0 14px; }
   .field{ margin-bottom:14px; }
   .field label{ display:block; font-size:13px; color:var(--muted); margin-bottom:6px; font-weight:500; }
-  input[type=text], input[type=tel], input[type=number], textarea{
-    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:10px;
+
+  input[type=text], input[type=tel], input[type=number], input[type=password], input[type=email], textarea, select{
+    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px;
     font-size:15px; font-family:inherit; color:var(--text); background:#FFFDFA;
+    transition:border-color .15s ease, box-shadow .15s ease; box-shadow:0 1px 2px rgba(62,50,38,.03);
   }
-  input:focus, textarea:focus{ outline:none; border-color:var(--primary); }
+  input:hover, textarea:hover, select:hover{ border-color:#D9C6AC; }
+  input:focus, textarea:focus, select:focus{
+    outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(189,129,73,.14);
+  }
+  input::placeholder, textarea::placeholder{ color:#C4B6A3; }
   textarea{ resize:vertical; min-height:70px; }
+
+  select{
+    appearance:none; -webkit-appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%239A8A76' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 14px center; padding-right:36px;
+  }
+  select:disabled{ opacity:.6; cursor:not-allowed; }
 
   .choice-group{ display:flex; flex-direction:column; gap:8px; }
   .choice{ display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-radius:10px; padding:12px 14px; cursor:pointer; font-size:14px; }
@@ -143,7 +156,7 @@
 
   /* ===== 出貨後台專用樣式 ===== */
   .admin-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
-  .admin-toolbar select{ padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; }
+  .admin-toolbar select{ width:auto; }
   .admin-table-scroll{ overflow-x:auto; }
   table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; font-size:13px; }
   th, td{ padding:9px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
@@ -153,7 +166,7 @@
   .badge{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; background:var(--accent); color:#fff; }
   .admin-empty{ text-align:center; padding:40px; color:var(--muted); }
   .admin-footer-bar{ position:sticky; bottom:0; background:var(--bg); padding:14px 0; display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
-  .admin-footer-bar select{ padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; }
+  .admin-footer-bar select{ width:auto; }
   #adminView .btn{ width:auto; }
 
   .admin-tabs{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line); }
@@ -226,11 +239,11 @@
       <div id="loginFormBox">
         <div class="field">
           <label for="custPhone">電話</label>
-          <input type="tel" id="custPhone" required placeholder="手機號碼">
+          <input type="tel" id="custPhone" placeholder="手機號碼">
         </div>
         <div class="field">
           <label for="custName">姓名</label>
-          <input type="text" id="custName" required placeholder="您的稱呼">
+          <input type="text" id="custName" placeholder="您的稱呼（電話、姓名擇一填寫即可）">
         </div>
         <div class="field">
           <label for="custSocialName">社群名稱／暱稱（選填）</label>
@@ -527,18 +540,10 @@
 
     <!-- 新增團別彈窗 -->
     <div id="addGroupModal" class="modal-overlay" style="display:none;">
-      <div class="modal-box">
+      <div class="modal-box" style="max-width:360px;">
         <div class="step-title" style="font-size:16px;">新增團別</div>
         <div class="field"><label>團別名稱</label><input type="text" id="groupModalName" placeholder="例如：2026年8月團"></div>
-
-        <div class="hint">商品目錄（選填，之後建立訂單時可以快速帶入）</div>
-        <div class="admin-table-scroll">
-          <table style="margin-top:8px;">
-            <thead><tr><th>品名</th><th>單價</th><th></th></tr></thead>
-            <tbody id="groupModalItemsBody"></tbody>
-          </table>
-        </div>
-        <button type="button" class="btn btn-ghost" style="margin-top:8px;" onclick="addGroupModalItemRow()">＋ 新增一列商品</button>
+        <div class="hint">商品目錄如果需要，可以之後直接到「團別商品」分頁補上，建立訂單時就能快速帶入。</div>
 
         <div class="btn-row">
           <button type="button" class="btn btn-ghost" onclick="closeAddGroupModal()">取消</button>
@@ -550,27 +555,28 @@
     <!-- 分頁：叫貨與配貨 -->
     <div id="adminTab-summary" class="admin-tab-panel" style="display:none;">
       <div class="card">
-        <div class="step-title" style="font-size:15px;">登記到貨</div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-          <div class="field" style="flex:1; min-width:120px;"><label>團別</label><select id="arrivalSource"></select></div>
-          <div class="field" style="flex:1; min-width:120px;"><label>品項</label><input type="text" id="arrivalItem" placeholder="品項名稱"></div>
-          <div class="field" style="width:90px;"><label>款式</label><input type="text" id="arrivalVariant" placeholder="選填"></div>
-          <div class="field" style="width:90px;"><label>尺寸</label><input type="text" id="arrivalSize" placeholder="選填"></div>
-          <div class="field" style="width:90px;"><label>到貨數量</label><input type="number" id="arrivalQty" min="0"></div>
-          <button type="button" class="btn btn-primary" onclick="addArrival()" style="margin-bottom:14px;">登記到貨</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="field"><label>團別</label><select id="summarySource"></select></div>
-        <button type="button" class="btn btn-primary" onclick="loadItemSummary()">統計本梯次品項需求量</button>
+        <div class="field"><label>團別</label><select id="summarySource" onchange="loadItemSummary()"></select></div>
+        <div class="hint">選擇團別後，下方會直接列出這一團目前登記的品項，對照清點數量後直接在該列輸入到貨數量登記即可。</div>
 
         <div class="admin-table-scroll" style="margin-top:14px;">
           <table id="summaryTable" style="display:none;">
-            <thead><tr><th>品項</th><th>款式</th><th>尺寸</th><th>總需求量</th><th>已確認</th><th>已配貨</th><th>到貨數量</th><th>可配新庫存</th><th></th></tr></thead>
+            <thead><tr><th>品項</th><th>款式</th><th>尺寸</th><th>總需求</th><th>已確認</th><th>已配貨</th><th>目前到貨</th><th>可配新庫存</th><th>登記到貨</th><th>配貨</th></tr></thead>
             <tbody id="summaryBody"></tbody>
           </table>
-          <div class="admin-empty" id="summaryEmpty" style="display:none;">這個團別目前沒有品項資料</div>
+          <div class="admin-empty" id="summaryEmpty" style="display:none;">這個團別目前還沒有品項資料，請先到「建立訂單」建立幾筆訂單</div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <a href="javascript:void(0)" onclick="toggleOtherArrivalForm()" style="font-size:12.5px; color:var(--muted);">找不到品項／要登記清單以外的到貨？點這裡</a>
+        </div>
+        <div id="otherArrivalForm" style="display:none; margin-top:10px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+            <div class="field" style="flex:1; min-width:120px;"><label>品項</label><input type="text" id="arrivalItem" placeholder="品項名稱"></div>
+            <div class="field" style="width:90px;"><label>款式</label><input type="text" id="arrivalVariant" placeholder="選填"></div>
+            <div class="field" style="width:90px;"><label>尺寸</label><input type="text" id="arrivalSize" placeholder="選填"></div>
+            <div class="field" style="width:90px;"><label>到貨數量</label><input type="number" id="arrivalQty" min="0"></div>
+            <button type="button" class="btn btn-primary" onclick="addArrival()" style="margin-bottom:14px;">登記到貨</button>
+          </div>
         </div>
       </div>
     </div>
@@ -579,7 +585,7 @@
 
 <script>
 // ⚠️ 部署完成後，請把下面這行換成您的 GAS 網頁應用程式網址
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbx1GQQSkP9l1aHM8Ftb4upzj5JypHurAsT55ZWeEpwQz0xx3NerRvg5Xxe3E0b-3y0n/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbycImsQOAY_fm2L-B2ay_95hI7Umumh0sdtGpukuK_g1N_ZD-MilHV7DQGdPSlJV2a4/exec';
 
 var state = {
   member: null,
@@ -645,8 +651,8 @@ document.getElementById('searchBtn').addEventListener('click', function(){
   var errorBox = document.getElementById('searchError');
   errorBox.style.display = 'none';
 
-  if(!phone || !name){
-    errorBox.textContent = '請填寫電話與姓名';
+  if(!phone && !name && !socialName){
+    errorBox.textContent = '請至少填寫電話、姓名或社群名稱其中一項';
     errorBox.style.display = '';
     return;
   }
@@ -668,7 +674,9 @@ document.getElementById('searchBtn').addEventListener('click', function(){
 
     document.getElementById('loginFormBox').style.display = 'none';
     document.getElementById('loggedInBar').style.display = '';
-    document.getElementById('loggedInName').textContent = name + '（' + phone + '）';
+    if(res.resolvedPhone){ document.getElementById('custPhone').value = res.resolvedPhone; }
+    document.getElementById('loggedInName').textContent =
+      (res.member.name || name) + (res.resolvedPhone ? '（' + res.resolvedPhone + '）' : '');
 
     renderMemberCard();
     renderPendingList();
@@ -1288,7 +1296,7 @@ function addDiscountRow(){
   row.className = 'discount-row';
   row.innerHTML =
     '<input type="text" class="discountLabel" placeholder="說明，例如：合購優惠" style="flex:1;">' +
-    '<input type="number" class="discountAmount" placeholder="金額（折扣請打負數）" style="width:150px;">' +
+    '<input type="number" class="discountAmount" placeholder="折扣金額（輸入正數即可，自動轉為折扣）" min="0" style="width:190px;">' +
     '<button type="button" class="btn btn-ghost" onclick="this.closest(\'.discount-row\').remove(); updateNewOrderTotal();">刪除</button>';
   row.querySelector('.discountAmount').addEventListener('input', updateNewOrderTotal);
   box.appendChild(row);
@@ -1304,7 +1312,7 @@ function updateNewOrderTotal(){
     total += subtotal;
   });
   document.querySelectorAll('#discountRowsBody .discount-row').forEach(function(row){
-    total += Number(row.querySelector('.discountAmount').value) || 0;
+    total += -Math.abs(Number(row.querySelector('.discountAmount').value) || 0);
   });
   document.getElementById('newOrderTotal').textContent = total;
 }
@@ -1370,7 +1378,7 @@ function createOrder(){
   });
   document.querySelectorAll('#discountRowsBody .discount-row').forEach(function(row){
     var label = row.querySelector('.discountLabel').value.trim();
-    var amount = Number(row.querySelector('.discountAmount').value) || 0;
+    var amount = -Math.abs(Number(row.querySelector('.discountAmount').value) || 0);
     if(!label || !amount) return;
     items.push({ name: '[優惠]' + label, variant: '', size: '', qty: 1, price: amount });
   });
@@ -1405,34 +1413,16 @@ addNewOrderItemRow();
 function openAddGroupModal(){
   document.getElementById('addGroupModal').style.display = 'flex';
   document.getElementById('groupModalName').value = '';
-  document.getElementById('groupModalItemsBody').innerHTML = '';
-  addGroupModalItemRow();
 }
 function closeAddGroupModal(){
   document.getElementById('addGroupModal').style.display = 'none';
-}
-function addGroupModalItemRow(){
-  var tbody = document.getElementById('groupModalItemsBody');
-  var tr = document.createElement('tr');
-  tr.innerHTML =
-    '<td><input type="text" class="gModalItemName" placeholder="品名"></td>' +
-    '<td><input type="number" class="gModalItemPrice" value="0" style="width:90px;"></td>' +
-    '<td><button type="button" class="btn btn-ghost" onclick="this.closest(\'tr\').remove();">刪除</button></td>';
-  tbody.appendChild(tr);
 }
 function submitAddGroup(){
   var name = document.getElementById('groupModalName').value.trim();
   if(!name){ alert('請輸入團別名稱'); return; }
 
-  var items = [];
-  document.querySelectorAll('#groupModalItemsBody tr').forEach(function(tr){
-    var itemName = tr.querySelector('.gModalItemName').value.trim();
-    if(!itemName) return;
-    items.push({ name: itemName, price: Number(tr.querySelector('.gModalItemPrice').value) || 0 });
-  });
-
   document.getElementById('groupModalSubmitBtn').disabled = true;
-  gasPostAction('adminAddGroup', { code: adminCode, name: name, items: items }).then(function(res){
+  gasPostAction('adminAddGroup', { code: adminCode, name: name }).then(function(res){
     document.getElementById('groupModalSubmitBtn').disabled = false;
     if(!res.success){ alert(res.message || '新增失敗'); return; }
     closeAddGroupModal();
@@ -1447,7 +1437,7 @@ function submitAddGroup(){
 
 function loadItemSummary(){
   var source = document.getElementById('summarySource').value;
-  if(!source){ alert('請選擇團別'); return; }
+  if(!source){ return; }
 
   gasGet({ action:'adminItemSummary', code: adminCode, source: source }).then(function(res){
     var table = document.getElementById('summaryTable');
@@ -1460,12 +1450,13 @@ function loadItemSummary(){
 
     table.style.display = '';
     empty.style.display = 'none';
-    res.items.forEach(function(it){
+    res.items.forEach(function(it, i){
       var tr = document.createElement('tr');
       var argSource = escapeHtml(source).replace(/'/g,"\\'");
       var argName = escapeHtml(it.name).replace(/'/g,"\\'");
       var argVariant = escapeHtml(it.variant || '').replace(/'/g,"\\'");
       var argSize = escapeHtml(it.size || '').replace(/'/g,"\\'");
+      var inputId = 'inlineArrivalQty' + i;
       tr.innerHTML =
         '<td>' + escapeHtml(it.name) + '</td>' +
         '<td>' + escapeHtml(it.variant || '—') + '</td>' +
@@ -1475,10 +1466,29 @@ function loadItemSummary(){
         '<td>' + it.allocatedQty + '</td>' +
         '<td>' + it.arrivedQty + '</td>' +
         '<td class="' + (it.availableNew > 0 ? 'allocated-yes' : '') + '">' + it.availableNew + '</td>' +
+        '<td style="display:flex; gap:4px;">' +
+          '<input type="number" id="' + inputId + '" min="0" style="width:60px;" placeholder="數量">' +
+          '<button type="button" class="btn btn-ghost" onclick="addArrivalInline(\'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\', \'' + inputId + '\')">登記</button>' +
+        '</td>' +
         '<td><button type="button" class="btn btn-primary" onclick="allocateItem(\'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\')">一鍵配貨</button></td>';
       body.appendChild(tr);
     });
   }).catch(function(){ alert('統計失敗，請確認網路連線'); });
+}
+
+function addArrivalInline(source, itemName, variant, size, inputId){
+  var qty = Number(document.getElementById(inputId).value) || 0;
+  if(!qty){ alert('請輸入到貨數量'); return; }
+
+  gasPostAction('adminAddArrival', { code: adminCode, source: source, item: itemName, variant: variant, size: size, qty: qty }).then(function(res){
+    if(!res.success){ alert(res.message || '登記失敗'); return; }
+    loadItemSummary();
+  }).catch(function(){ alert('登記失敗，請確認網路連線'); });
+}
+
+function toggleOtherArrivalForm(){
+  var box = document.getElementById('otherArrivalForm');
+  box.style.display = box.style.display === 'none' ? '' : 'none';
 }
 
 function allocateItem(source, itemName, variant, size){
@@ -1490,7 +1500,7 @@ function allocateItem(source, itemName, variant, size){
 }
 
 function addArrival(){
-  var source = document.getElementById('arrivalSource').value;
+  var source = document.getElementById('summarySource').value;
   var itemName = document.getElementById('arrivalItem').value.trim();
   var variant = document.getElementById('arrivalVariant').value.trim();
   var size = document.getElementById('arrivalSize').value.trim();
@@ -1504,6 +1514,7 @@ function addArrival(){
     document.getElementById('arrivalVariant').value = '';
     document.getElementById('arrivalSize').value = '';
     document.getElementById('arrivalQty').value = '';
+    loadItemSummary();
   }).catch(function(){ alert('登記失敗，請確認網路連線'); });
 }
 
@@ -1512,7 +1523,7 @@ function addArrival(){
 function loadGroupOptions(){
   gasGet({ action:'adminGroupList', code: adminCode }).then(function(res){
     if(!res.success) return;
-    ['newOrderSource', 'summarySource', 'arrivalSource'].forEach(function(id){
+    ['newOrderSource', 'summarySource'].forEach(function(id){
       var select = document.getElementById(id);
       var current = select.value;
       select.innerHTML = res.groups.map(function(g){ return '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>'; }).join('');
