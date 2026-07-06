@@ -233,7 +233,6 @@
 
     <!-- STEP 1：會員登入 -->
     <div class="card step" data-step="1">
-      <div class="step-label">STEP 1</div>
       <div class="step-title">🔑 會員登入</div>
 
       <div id="loginFormBox">
@@ -263,28 +262,20 @@
 
       <div id="memberCardBox"></div>
 
-      <div id="pendingBox" style="display:none;">
-        <div class="hint" style="margin-top:14px;">待付款訂單，點選要付款的那筆：</div>
-        <div class="pending-list" id="pendingList"></div>
-      </div>
-      <div id="noPendingMsg" class="hint" style="display:none; margin-top:14px;">目前沒有待付款的訂單</div>
-
-      <div id="orderHistoryBox" style="display:none; margin-top:20px;">
-        <div class="hint">我的訂單紀錄：</div>
-        <div class="history-list" id="historyList"></div>
-      </div>
-
       <div id="creditLedgerBox" style="display:none; margin-top:20px;">
-        <div class="hint">我的購物金紀錄：</div>
+        <div class="hint">💰 我的購物金明細：</div>
         <div class="history-list" id="creditLedgerList"></div>
       </div>
 
-      <div id="creditBox" style="display:none;">
-        <div class="field" style="margin-top:14px;">
-          <label for="useCredit">使用購物金折抵（可留空，最多可折抵至 0 元）</label>
-          <input type="number" id="useCredit" min="0" placeholder="0">
-          <div class="hint">回饋金以「商品金額」計算，不含運費</div>
-        </div>
+      <div id="pendingBox" style="display:none; margin-top:20px;">
+        <div class="hint">待付款訂單，點選要付款的那筆：</div>
+        <div class="pending-list" id="pendingList"></div>
+      </div>
+      <div id="noPendingMsg" class="hint" style="display:none; margin-top:20px;">目前沒有待付款的訂單</div>
+
+      <div id="orderHistoryBox" style="display:none; margin-top:20px;">
+        <div class="hint">📦 我的訂單明細：</div>
+        <div class="history-list" id="historyList"></div>
       </div>
 
       <div class="btn-row" id="step1Next" style="display:none;">
@@ -294,8 +285,15 @@
 
     <!-- STEP 2：付款方式與證明 -->
     <div class="card step" data-step="2" style="display:none;">
-      <div class="step-label">STEP 2</div>
       <div class="step-title">付款方式與證明</div>
+
+      <div id="creditBox" style="display:none;">
+        <div class="field">
+          <label for="useCredit">使用購物金折抵（可留空，最多可折抵至 0 元）</label>
+          <input type="number" id="useCredit" min="0" placeholder="0">
+          <div class="hint">回饋金以「商品金額」計算，不含運費</div>
+        </div>
+      </div>
 
       <div class="field">
         <label>付款方式</label>
@@ -338,7 +336,6 @@
 
     <!-- STEP 3：配送資訊 -->
     <div class="card step" data-step="3" style="display:none;">
-      <div class="step-label">STEP 3</div>
       <div class="step-title">配送資訊</div>
 
       <div class="field">
@@ -391,7 +388,6 @@
 
     <!-- STEP 4：確認送出 -->
     <div class="card step" data-step="4" style="display:none;">
-      <div class="step-label">STEP 4</div>
       <div class="step-title">最後確認</div>
       <dl class="summary-list" id="summaryBox"></dl>
       <div class="btn-row">
@@ -505,6 +501,10 @@
         <div class="field"><label>社群名稱／暱稱（選填）</label><input type="text" id="newOrderSocialName"></div>
 
         <div class="field">
+          <label>總團別</label>
+          <select id="newOrderParent" onchange="onNewOrderParentChange()"></select>
+        </div>
+        <div class="field">
           <label>團別</label>
           <div style="display:flex; gap:8px;">
             <select id="newOrderSource" style="flex:1;" onchange="loadCatalogForNewOrder()"></select>
@@ -542,7 +542,9 @@
     <div id="addGroupModal" class="modal-overlay" style="display:none;">
       <div class="modal-box" style="max-width:360px;">
         <div class="step-title" style="font-size:16px;">新增團別</div>
-        <div class="field"><label>團別名稱</label><input type="text" id="groupModalName" placeholder="例如：2026年8月團"></div>
+        <div class="field"><label>總團別</label><input type="text" id="groupModalParent" placeholder="例如：2026/06記事本團" list="existingParentsList"></div>
+        <datalist id="existingParentsList"></datalist>
+        <div class="field"><label>團別名稱</label><input type="text" id="groupModalName" placeholder="例如：Owala 水杯系列"></div>
         <div class="hint">商品目錄如果需要，可以之後直接到「團別商品」分頁補上，建立訂單時就能快速帶入。</div>
 
         <div class="btn-row">
@@ -555,6 +557,7 @@
     <!-- 分頁：叫貨與配貨 -->
     <div id="adminTab-summary" class="admin-tab-panel" style="display:none;">
       <div class="card">
+        <div class="field"><label>總團別</label><select id="summaryParent" onchange="onSummaryParentChange()"></select></div>
         <div class="field"><label>團別</label><select id="summarySource" onchange="loadItemSummary()"></select></div>
         <div class="hint">選擇團別後，下方會直接列出這一團目前登記的品項，對照清點數量後直接在該列輸入到貨數量登記即可。</div>
 
@@ -585,7 +588,7 @@
 
 <script>
 // ⚠️ 部署完成後，請把下面這行換成您的 GAS 網頁應用程式網址
-var GAS_URL = 'https://script.google.com/macros/s/AKfycby5mGKPZ0ecnvDNWR-eD1shGBc4hW1mvFYDHemR5RRWMjlzoT44DSK6gGReOJ8Zikk6/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbz8bHp7ruWZnw7jVJAV36lQpoCrs1GUy8y_2mmIGqzp1zyo621heUzCx66oUQn41hbRnw/exec';
 
 var state = {
   member: null,
@@ -758,7 +761,7 @@ function renderPendingList(){
   state.pendingOrders.forEach(function(p){
     var el = document.createElement('div');
     el.className = 'pending-item';
-    el.innerHTML = '<div class="src">' + escapeHtml(String(p.source || '')) + '</div>' +
+    el.innerHTML = '<div class="src">' + escapeHtml(String(p.parent ? (p.parent + ' · ' + p.source) : (p.source || ''))) + '</div>' +
       '<div>' + escapeHtml(formatItemsDisplay(p.items || [])) + '</div>' +
       '<div class="amt">NT$ ' + escapeHtml(String(p.amount || 0)) + '</div>';
     el.addEventListener('click', function(){
@@ -809,7 +812,7 @@ function renderOrderHistory(){
 
     el.innerHTML =
       '<div class="top-row">' +
-        '<div><div class="src">' + escapeHtml(String(o.source || '')) + '</div>' + escapeHtml(String(o.items || '')) + '</div>' +
+        '<div><div class="src">' + escapeHtml(String(o.parent ? (o.parent + ' · ' + o.source) : (o.source || ''))) + '</div>' + escapeHtml(String(o.items || '')) + '</div>' +
         '<span class="status-pill ' + statusPillClass(o.status) + '">' + escapeHtml(String(o.status || '')) + '</span>' +
       '</div>' +
       '<div class="history-detail">' +
@@ -1336,12 +1339,13 @@ function lookupOrderMember(){
 
 // ---------- 團別商品快速加入 ----------
 function loadCatalogForNewOrder(){
+  var parent = document.getElementById('newOrderParent').value;
   var source = document.getElementById('newOrderSource').value;
   var box = document.getElementById('catalogQuickAdd');
   var chipsBox = document.getElementById('catalogChips');
-  if(!source){ box.style.display = 'none'; return; }
+  if(!parent || !source){ box.style.display = 'none'; return; }
 
-  gasGet({ action:'adminGroupItems', code: adminCode, source: source }).then(function(res){
+  gasGet({ action:'adminGroupItems', code: adminCode, parent: parent, source: source }).then(function(res){
     if(!res.success || !res.items.length){ box.style.display = 'none'; return; }
     box.style.display = '';
     chipsBox.innerHTML = '';
@@ -1361,8 +1365,9 @@ function createOrder(){
   var phone = document.getElementById('newOrderPhone').value.trim();
   var name = document.getElementById('newOrderName').value.trim();
   var socialName = document.getElementById('newOrderSocialName').value.trim();
+  var parent = document.getElementById('newOrderParent').value;
   var source = document.getElementById('newOrderSource').value;
-  if(!phone || !name || !source){ alert('請填寫電話、姓名、團別'); return; }
+  if(!phone || !name || !parent || !source){ alert('請填寫電話、姓名、總團別、團別'); return; }
 
   var items = [];
   document.querySelectorAll('#newOrderItemsBody tr').forEach(function(tr){
@@ -1385,7 +1390,7 @@ function createOrder(){
   if(!items.length){ alert('請至少新增一列品項'); return; }
 
   document.getElementById('createOrderBtn').disabled = true;
-  gasPostAction('adminCreateOrder', { code: adminCode, phone: phone, name: name, socialName: socialName, source: source, items: items })
+  gasPostAction('adminCreateOrder', { code: adminCode, phone: phone, name: name, socialName: socialName, parent: parent, source: source, items: items })
     .then(function(res){
       document.getElementById('createOrderBtn').disabled = false;
       if(res.success){
@@ -1412,21 +1417,27 @@ addNewOrderItemRow();
 // ---------- 新增團別彈窗 ----------
 function openAddGroupModal(){
   document.getElementById('addGroupModal').style.display = 'flex';
+  document.getElementById('groupModalParent').value = document.getElementById('newOrderParent').value || '';
   document.getElementById('groupModalName').value = '';
 }
 function closeAddGroupModal(){
   document.getElementById('addGroupModal').style.display = 'none';
 }
 function submitAddGroup(){
+  var parent = document.getElementById('groupModalParent').value.trim();
   var name = document.getElementById('groupModalName').value.trim();
-  if(!name){ alert('請輸入團別名稱'); return; }
+  if(!parent || !name){ alert('請輸入總團別與團別名稱'); return; }
 
   document.getElementById('groupModalSubmitBtn').disabled = true;
-  gasPostAction('adminAddGroup', { code: adminCode, name: name }).then(function(res){
+  gasPostAction('adminAddGroup', { code: adminCode, parent: parent, name: name }).then(function(res){
     document.getElementById('groupModalSubmitBtn').disabled = false;
     if(!res.success){ alert(res.message || '新增失敗'); return; }
     closeAddGroupModal();
-    loadGroupOptions();
+    loadGroupOptions().then(function(){
+      document.getElementById('newOrderParent').value = parent;
+      onNewOrderParentChange();
+      document.getElementById('newOrderSource').value = name;
+    });
   }).catch(function(){
     document.getElementById('groupModalSubmitBtn').disabled = false;
     alert('新增失敗，請確認網路連線');
@@ -1436,10 +1447,11 @@ function submitAddGroup(){
 // ===================== 叫貨統計 / 配貨清單 =====================
 
 function loadItemSummary(){
+  var parent = document.getElementById('summaryParent').value;
   var source = document.getElementById('summarySource').value;
-  if(!source){ return; }
+  if(!parent || !source){ return; }
 
-  gasGet({ action:'adminItemSummary', code: adminCode, source: source }).then(function(res){
+  gasGet({ action:'adminItemSummary', code: adminCode, parent: parent, source: source }).then(function(res){
     var table = document.getElementById('summaryTable');
     var empty = document.getElementById('summaryEmpty');
     var body = document.getElementById('summaryBody');
@@ -1452,6 +1464,7 @@ function loadItemSummary(){
     empty.style.display = 'none';
     res.items.forEach(function(it, i){
       var tr = document.createElement('tr');
+      var argParent = escapeHtml(parent).replace(/'/g,"\\'");
       var argSource = escapeHtml(source).replace(/'/g,"\\'");
       var argName = escapeHtml(it.name).replace(/'/g,"\\'");
       var argVariant = escapeHtml(it.variant || '').replace(/'/g,"\\'");
@@ -1468,19 +1481,19 @@ function loadItemSummary(){
         '<td class="' + (it.availableNew > 0 ? 'allocated-yes' : '') + '">' + it.availableNew + '</td>' +
         '<td style="display:flex; gap:4px;">' +
           '<input type="number" id="' + inputId + '" min="0" style="width:60px;" placeholder="數量">' +
-          '<button type="button" class="btn btn-ghost" onclick="addArrivalInline(\'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\', \'' + inputId + '\')">登記</button>' +
+          '<button type="button" class="btn btn-ghost" onclick="addArrivalInline(\'' + argParent + '\', \'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\', \'' + inputId + '\')">登記</button>' +
         '</td>' +
-        '<td><button type="button" class="btn btn-primary" onclick="allocateItem(\'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\')">一鍵配貨</button></td>';
+        '<td><button type="button" class="btn btn-primary" onclick="allocateItem(\'' + argParent + '\', \'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\')">一鍵配貨</button></td>';
       body.appendChild(tr);
     });
   }).catch(function(){ alert('統計失敗，請確認網路連線'); });
 }
 
-function addArrivalInline(source, itemName, variant, size, inputId){
+function addArrivalInline(parent, source, itemName, variant, size, inputId){
   var qty = Number(document.getElementById(inputId).value) || 0;
   if(!qty){ alert('請輸入到貨數量'); return; }
 
-  gasPostAction('adminAddArrival', { code: adminCode, source: source, item: itemName, variant: variant, size: size, qty: qty }).then(function(res){
+  gasPostAction('adminAddArrival', { code: adminCode, parent: parent, source: source, item: itemName, variant: variant, size: size, qty: qty }).then(function(res){
     if(!res.success){ alert(res.message || '登記失敗'); return; }
     loadItemSummary();
   }).catch(function(){ alert('登記失敗，請確認網路連線'); });
@@ -1491,8 +1504,8 @@ function toggleOtherArrivalForm(){
   box.style.display = box.style.display === 'none' ? '' : 'none';
 }
 
-function allocateItem(source, itemName, variant, size){
-  gasPostAction('adminAllocate', { code: adminCode, source: source, item: itemName, variant: variant, size: size }).then(function(res){
+function allocateItem(parent, source, itemName, variant, size){
+  gasPostAction('adminAllocate', { code: adminCode, parent: parent, source: source, item: itemName, variant: variant, size: size }).then(function(res){
     if(!res.success){ alert(res.message || '配貨失敗'); return; }
     alert('本次新配貨 ' + res.newlyAllocated + ' 筆，還在等待的 ' + res.remainingWaiting + ' 筆，剩餘新庫存 ' + res.remainingStock);
     loadItemSummary();
@@ -1500,14 +1513,15 @@ function allocateItem(source, itemName, variant, size){
 }
 
 function addArrival(){
+  var parent = document.getElementById('summaryParent').value;
   var source = document.getElementById('summarySource').value;
   var itemName = document.getElementById('arrivalItem').value.trim();
   var variant = document.getElementById('arrivalVariant').value.trim();
   var size = document.getElementById('arrivalSize').value.trim();
   var qty = Number(document.getElementById('arrivalQty').value) || 0;
-  if(!source || !itemName || !qty){ alert('請選擇團別、填寫品項與到貨數量'); return; }
+  if(!parent || !source || !itemName || !qty){ alert('請選擇總團別、團別、填寫品項與到貨數量'); return; }
 
-  gasPostAction('adminAddArrival', { code: adminCode, source: source, item: itemName, variant: variant, size: size, qty: qty }).then(function(res){
+  gasPostAction('adminAddArrival', { code: adminCode, parent: parent, source: source, item: itemName, variant: variant, size: size, qty: qty }).then(function(res){
     if(!res.success){ alert(res.message || '登記失敗'); return; }
     alert('登記成功！');
     document.getElementById('arrivalItem').value = '';
@@ -1520,18 +1534,50 @@ function addArrival(){
 
 // ===================== 團別管理 =====================
 
+var allGroups = []; // [{parent, name}]
+
 function loadGroupOptions(){
-  gasGet({ action:'adminGroupList', code: adminCode }).then(function(res){
+  return gasGet({ action:'adminGroupList', code: adminCode }).then(function(res){
     if(!res.success) return;
-    ['newOrderSource', 'summarySource'].forEach(function(id){
+    allGroups = res.groups || [];
+
+    var parents = Array.from(new Set(allGroups.map(function(g){ return g.parent; }))).filter(function(p){ return p; });
+
+    ['newOrderParent', 'summaryParent'].forEach(function(id){
       var select = document.getElementById(id);
       var current = select.value;
-      select.innerHTML = res.groups.map(function(g){ return '<option value="' + escapeHtml(g) + '">' + escapeHtml(g) + '</option>'; }).join('');
-      if(res.groups.indexOf(current) > -1) select.value = current;
+      select.innerHTML = '<option value="">請選擇總團別</option>' +
+        parents.map(function(p){ return '<option value="' + escapeHtml(p) + '">' + escapeHtml(p) + '</option>'; }).join('');
+      if(parents.indexOf(current) > -1) select.value = current;
     });
+
+    document.getElementById('existingParentsList').innerHTML =
+      parents.map(function(p){ return '<option value="' + escapeHtml(p) + '">'; }).join('');
+
+    onNewOrderParentChange();
+    onSummaryParentChange();
   });
 }
 
+function populateChildSelect(parentSelectId, childSelectId){
+  var parent = document.getElementById(parentSelectId).value;
+  var select = document.getElementById(childSelectId);
+  var current = select.value;
+  var children = allGroups.filter(function(g){ return g.parent === parent; }).map(function(g){ return g.name; });
+  select.innerHTML = '<option value="">請選擇團別</option>' +
+    children.map(function(n){ return '<option value="' + escapeHtml(n) + '">' + escapeHtml(n) + '</option>'; }).join('');
+  if(children.indexOf(current) > -1) select.value = current;
+}
+
+function onNewOrderParentChange(){
+  populateChildSelect('newOrderParent', 'newOrderSource');
+  loadCatalogForNewOrder();
+}
+function onSummaryParentChange(){
+  populateChildSelect('summaryParent', 'summarySource');
+  document.getElementById('summaryTable').style.display = 'none';
+  document.getElementById('summaryEmpty').style.display = 'none';
+}
 </script>
 
 </body>
