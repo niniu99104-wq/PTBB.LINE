@@ -108,6 +108,13 @@
   .history-detail{ margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); font-size:12.5px; color:var(--muted); display:none; }
   .history-item.open .history-detail{ display:block; }
 
+  .logged-in-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--accent-light); border:1px solid var(--accent);
+    border-radius:12px; padding:12px 16px; font-size:14px; margin-bottom:6px;
+  }
+  .logged-in-bar a{ color:var(--primary-dark); font-size:12.5px; text-decoration:underline; }
+
   .hint{ font-size:12px; color:var(--muted); margin-top:6px; }
   .error-text{ font-size:13px; color:var(--danger); margin-top:8px; }
 
@@ -158,6 +165,37 @@
   .admin-tab-panel table input{ width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-size:13px; }
   .allocated-yes{ color:var(--accent); font-weight:700; }
   .allocated-no{ color:var(--danger); font-weight:700; }
+
+  .catalog-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .catalog-chip{
+    border:1px solid var(--accent); background:var(--accent-light); color:var(--primary-dark);
+    border-radius:20px; padding:6px 14px; font-size:13px; cursor:pointer;
+  }
+  .catalog-chip:active{ background:var(--accent); color:#fff; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(62,50,38,.45); z-index:200;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-box{
+    background:var(--surface); border-radius:16px; padding:24px; max-width:480px; width:100%;
+    max-height:85vh; overflow-y:auto;
+  }
+  .discount-row{
+    display:flex; gap:8px; align-items:center; background:#FBF1E4; border:1px solid var(--gold);
+    border-radius:10px; padding:8px 10px; margin-top:8px;
+  }
+  .discount-row input{ padding:8px; border:1px solid var(--line); border-radius:6px; font-size:13px; }
+
+  .admin-login-card{
+    max-width:340px; margin:70px auto; background:linear-gradient(160deg, #FFFDF8, var(--gold-light));
+    border:1px solid var(--gold); border-radius:20px; padding:36px 28px; text-align:center;
+    box-shadow:0 12px 30px rgba(157,120,74,.12);
+  }
+  .admin-login-icon{ font-size:36px; margin-bottom:6px; }
+  .admin-login-title{ font-family:"Noto Serif TC", serif; font-size:20px; font-weight:700; }
+  .admin-login-sub{ font-size:12px; color:var(--muted); margin-bottom:20px; letter-spacing:.05em; }
+  .admin-login-card .field input{ text-align:center; }
 </style>
 </head>
 <body>
@@ -183,23 +221,32 @@
     <!-- STEP 1：會員登入 -->
     <div class="card step" data-step="1">
       <div class="step-label">STEP 1</div>
-      <div class="step-title">會員登入</div>
+      <div class="step-title">🔑 會員登入</div>
 
-      <div class="field">
-        <label for="custPhone">電話</label>
-        <input type="tel" id="custPhone" required placeholder="手機號碼">
-      </div>
-      <div class="field">
-        <label for="custName">姓名</label>
-        <input type="text" id="custName" required placeholder="您的稱呼">
-      </div>
-      <div class="field">
-        <label for="custSocialName">社群名稱／暱稱（選填）</label>
-        <input type="text" id="custSocialName" placeholder="例如：LINE暱稱、IG帳號">
+      <div id="loginFormBox">
+        <div class="field">
+          <label for="custPhone">電話</label>
+          <input type="tel" id="custPhone" required placeholder="手機號碼">
+        </div>
+        <div class="field">
+          <label for="custName">姓名</label>
+          <input type="text" id="custName" required placeholder="您的稱呼">
+        </div>
+        <div class="field">
+          <label for="custSocialName">社群名稱／暱稱（選填）</label>
+          <input type="text" id="custSocialName" placeholder="例如：LINE暱稱、IG帳號">
+        </div>
+
+        <button type="button" class="btn btn-primary" id="searchBtn">登入查詢</button>
+        <div id="searchError" class="error-text" style="display:none;"></div>
       </div>
 
-      <button type="button" class="btn btn-primary" id="searchBtn">登入查詢</button>
-      <div id="searchError" class="error-text" style="display:none;"></div>
+      <div id="loggedInBar" style="display:none;">
+        <div class="logged-in-bar">
+          <span>👋 <b id="loggedInName"></b>，歡迎回來</span>
+          <a href="javascript:void(0)" onclick="switchAccount()">切換帳號</a>
+        </div>
+      </div>
 
       <div id="memberCardBox"></div>
 
@@ -357,9 +404,11 @@
 <!-- ===================== 出貨後台（僅賣家使用） ===================== -->
 <div class="wrap" id="adminView" style="display:none; max-width:960px;">
 
-  <div id="loginScreen" class="card" style="max-width:340px; margin:60px auto;">
-    <div class="step-title">出貨後台登入</div>
-    <div class="field"><input type="password" id="adminCode" placeholder="請輸入管理密碼"></div>
+  <div id="loginScreen" class="admin-login-card">
+    <div class="admin-login-icon">🥜</div>
+    <div class="admin-login-title">出貨後台</div>
+    <div class="admin-login-sub">豆媽選品・管理專用</div>
+    <div class="field"><input type="password" id="adminCode" placeholder="請輸入管理密碼" onkeydown="if(event.key==='Enter')adminLogin()"></div>
     <button class="btn btn-primary" style="width:100%;" onclick="adminLogin()">登入</button>
     <div id="loginError" class="error-text"></div>
     <div style="text-align:center; margin-top:14px;">
@@ -433,22 +482,40 @@
     <!-- 分頁：建立訂單 -->
     <div id="adminTab-create" class="admin-tab-panel" style="display:none;">
       <div class="card">
-        <div class="field"><label>電話</label><input type="tel" id="newOrderPhone"></div>
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+          <div class="field" style="flex:1;"><label>電話</label><input type="tel" id="newOrderPhone" onblur="lookupOrderMember()"></div>
+          <button type="button" class="btn btn-ghost" onclick="lookupOrderMember()" style="margin-bottom:14px;">查詢會員</button>
+        </div>
+        <div id="memberLookupHint" class="hint"></div>
+
         <div class="field"><label>姓名</label><input type="text" id="newOrderName"></div>
+        <div class="field"><label>社群名稱／暱稱（選填）</label><input type="text" id="newOrderSocialName"></div>
+
         <div class="field">
           <label>團別</label>
           <div style="display:flex; gap:8px;">
-            <select id="newOrderSource" style="flex:1;"></select>
-            <button type="button" class="btn btn-ghost" onclick="promptAddGroup()">＋新增團別</button>
+            <select id="newOrderSource" style="flex:1;" onchange="loadCatalogForNewOrder()"></select>
+            <button type="button" class="btn btn-ghost" onclick="openAddGroupModal()">＋新增團別</button>
           </div>
         </div>
 
-        <div class="hint" style="margin-top:14px;">品項（折扣／補差價請用「[優惠]」或「[調整]」開頭，單價可打負數）</div>
-        <table style="margin-top:8px;">
-          <thead><tr><th>品名</th><th>數量</th><th>單價</th><th>小計</th><th></th></tr></thead>
-          <tbody id="newOrderItemsBody"></tbody>
-        </table>
+        <div id="catalogQuickAdd" style="display:none;">
+          <div class="hint">這個團別的商品，點一下快速加入：</div>
+          <div id="catalogChips" class="catalog-chips"></div>
+        </div>
+
+        <div class="hint" style="margin-top:14px;">商品項目</div>
+        <div class="admin-table-scroll">
+          <table style="margin-top:8px;">
+            <thead><tr><th>品名</th><th>款式</th><th>尺寸</th><th>數量</th><th>單價</th><th>小計</th><th></th></tr></thead>
+            <tbody id="newOrderItemsBody"></tbody>
+          </table>
+        </div>
         <button type="button" class="btn btn-ghost" style="margin-top:10px;" onclick="addNewOrderItemRow()">＋ 新增一列品項</button>
+
+        <div class="hint" style="margin-top:18px;">折扣／補差價（選填）</div>
+        <div id="discountRowsBody"></div>
+        <button type="button" class="btn btn-ghost" style="margin-top:8px;" onclick="addDiscountRow()">＋ 新增折扣／補差價</button>
 
         <div class="hint" style="margin-top:14px;">應付總額：NT$ <b id="newOrderTotal">0</b></div>
 
@@ -458,14 +525,38 @@
       </div>
     </div>
 
+    <!-- 新增團別彈窗 -->
+    <div id="addGroupModal" class="modal-overlay" style="display:none;">
+      <div class="modal-box">
+        <div class="step-title" style="font-size:16px;">新增團別</div>
+        <div class="field"><label>團別名稱</label><input type="text" id="groupModalName" placeholder="例如：2026年8月團"></div>
+
+        <div class="hint">商品目錄（選填，之後建立訂單時可以快速帶入）</div>
+        <div class="admin-table-scroll">
+          <table style="margin-top:8px;">
+            <thead><tr><th>品名</th><th>單價</th><th></th></tr></thead>
+            <tbody id="groupModalItemsBody"></tbody>
+          </table>
+        </div>
+        <button type="button" class="btn btn-ghost" style="margin-top:8px;" onclick="addGroupModalItemRow()">＋ 新增一列商品</button>
+
+        <div class="btn-row">
+          <button type="button" class="btn btn-ghost" onclick="closeAddGroupModal()">取消</button>
+          <button type="button" class="btn btn-primary" id="groupModalSubmitBtn" onclick="submitAddGroup()">建立團別</button>
+        </div>
+      </div>
+    </div>
+
     <!-- 分頁：叫貨與配貨 -->
     <div id="adminTab-summary" class="admin-tab-panel" style="display:none;">
       <div class="card">
         <div class="step-title" style="font-size:15px;">登記到貨</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-          <div class="field" style="flex:1; min-width:140px;"><label>團別</label><select id="arrivalSource"></select></div>
-          <div class="field" style="flex:1; min-width:140px;"><label>品項</label><input type="text" id="arrivalItem" placeholder="品項名稱"></div>
-          <div class="field" style="width:100px;"><label>到貨數量</label><input type="number" id="arrivalQty" min="0"></div>
+          <div class="field" style="flex:1; min-width:120px;"><label>團別</label><select id="arrivalSource"></select></div>
+          <div class="field" style="flex:1; min-width:120px;"><label>品項</label><input type="text" id="arrivalItem" placeholder="品項名稱"></div>
+          <div class="field" style="width:90px;"><label>款式</label><input type="text" id="arrivalVariant" placeholder="選填"></div>
+          <div class="field" style="width:90px;"><label>尺寸</label><input type="text" id="arrivalSize" placeholder="選填"></div>
+          <div class="field" style="width:90px;"><label>到貨數量</label><input type="number" id="arrivalQty" min="0"></div>
           <button type="button" class="btn btn-primary" onclick="addArrival()" style="margin-bottom:14px;">登記到貨</button>
         </div>
       </div>
@@ -476,7 +567,7 @@
 
         <div class="admin-table-scroll" style="margin-top:14px;">
           <table id="summaryTable" style="display:none;">
-            <thead><tr><th>品項</th><th>總需求量</th><th>已確認</th><th>已配貨</th><th>到貨數量</th><th>可配新庫存</th><th></th></tr></thead>
+            <thead><tr><th>品項</th><th>款式</th><th>尺寸</th><th>總需求量</th><th>已確認</th><th>已配貨</th><th>到貨數量</th><th>可配新庫存</th><th></th></tr></thead>
             <tbody id="summaryBody"></tbody>
           </table>
           <div class="admin-empty" id="summaryEmpty" style="display:none;">這個團別目前沒有品項資料</div>
@@ -575,6 +666,10 @@ document.getElementById('searchBtn').addEventListener('click', function(){
     state.creditLedger = res.creditLedger || [];
     if(res.shippingConfig){ state.shippingConfig = res.shippingConfig; }
 
+    document.getElementById('loginFormBox').style.display = 'none';
+    document.getElementById('loggedInBar').style.display = '';
+    document.getElementById('loggedInName').textContent = name + '（' + phone + '）';
+
     renderMemberCard();
     renderPendingList();
     renderOrderHistory();
@@ -589,6 +684,26 @@ document.getElementById('searchBtn').addEventListener('click', function(){
     errorBox.style.display = '';
   });
 });
+
+function switchAccount(){
+  document.getElementById('loginFormBox').style.display = '';
+  document.getElementById('loggedInBar').style.display = 'none';
+  document.getElementById('custPhone').value = '';
+  document.getElementById('custName').value = '';
+  document.getElementById('custSocialName').value = '';
+  document.getElementById('memberCardBox').innerHTML = '';
+  document.getElementById('pendingBox').style.display = 'none';
+  document.getElementById('noPendingMsg').style.display = 'none';
+  document.getElementById('orderHistoryBox').style.display = 'none';
+  document.getElementById('creditLedgerBox').style.display = 'none';
+  document.getElementById('creditBox').style.display = 'none';
+  document.getElementById('step1Next').style.display = 'none';
+  state.member = null;
+  state.pendingOrders = [];
+  state.orderHistory = [];
+  state.creditLedger = [];
+  state.selectedPending = null;
+}
 
 function renderMemberCard(){
   var m = state.member;
@@ -610,7 +725,10 @@ function renderMemberCard(){
 function formatItemsDisplay(items){
   return items
     .filter(function(it){ return String(it.name).indexOf('[優惠]') !== 0 && String(it.name).indexOf('[調整]') !== 0; })
-    .map(function(it){ return it.name + (it.qty > 1 ? ' x' + it.qty : ''); })
+    .map(function(it){
+      var variantLabel = [it.variant, it.size].filter(function(x){ return x; }).join('/');
+      return it.name + (variantLabel ? '（' + variantLabel + '）' : '') + (it.qty > 1 ? ' x' + it.qty : '');
+    })
     .join('、');
 }
 
@@ -674,8 +792,9 @@ function renderOrderHistory(){
       .filter(function(it){ return String(it.name).indexOf('[優惠]') !== 0 && String(it.name).indexOf('[調整]') !== 0; })
       .map(function(it){
         var isDelivered = it.deliveryStatus === '已配貨';
+        var variantLabel = [it.variant, it.size].filter(function(x){ return x; }).join('/');
         return '<div style="display:flex; justify-content:space-between; margin-top:4px;">' +
-          '<span>' + escapeHtml(it.name) + (it.qty > 1 ? ' x' + it.qty : '') + '</span>' +
+          '<span>' + escapeHtml(it.name) + (variantLabel ? '（' + escapeHtml(variantLabel) + '）' : '') + (it.qty > 1 ? ' x' + it.qty : '') + '</span>' +
           '<span class="status-pill ' + (isDelivered ? 'status-done' : 'status-pending') + '" style="font-size:10px;">' + (isDelivered ? '已配貨' : '未配貨') + '</span>' +
         '</div>';
       }).join('');
@@ -1144,19 +1263,35 @@ function showAdminTab(name, btnEl){
 
 // ===================== 建立訂單 =====================
 
-function addNewOrderItemRow(){
+function addNewOrderItemRow(prefill){
+  prefill = prefill || {};
   var tbody = document.getElementById('newOrderItemsBody');
   var tr = document.createElement('tr');
   tr.innerHTML =
-    '<td><input type="text" class="itemName" placeholder="品名"></td>' +
+    '<td><input type="text" class="itemName" placeholder="品名" value="' + escapeHtml(prefill.name || '') + '"></td>' +
+    '<td><input type="text" class="itemVariant" placeholder="選填" style="width:70px;"></td>' +
+    '<td><input type="text" class="itemSize" placeholder="選填" style="width:70px;"></td>' +
     '<td><input type="number" class="itemQty" value="1" min="0" style="width:60px;"></td>' +
-    '<td><input type="number" class="itemPrice" value="0" style="width:80px;"></td>' +
+    '<td><input type="number" class="itemPrice" value="' + (prefill.price || 0) + '" style="width:80px;"></td>' +
     '<td class="itemSubtotal">0</td>' +
     '<td><button type="button" class="btn btn-ghost" onclick="this.closest(\'tr\').remove(); updateNewOrderTotal();">刪除</button></td>';
   tr.querySelectorAll('.itemQty, .itemPrice').forEach(function(input){
     input.addEventListener('input', updateNewOrderTotal);
   });
   tbody.appendChild(tr);
+  updateNewOrderTotal();
+}
+
+function addDiscountRow(){
+  var box = document.getElementById('discountRowsBody');
+  var row = document.createElement('div');
+  row.className = 'discount-row';
+  row.innerHTML =
+    '<input type="text" class="discountLabel" placeholder="說明，例如：合購優惠" style="flex:1;">' +
+    '<input type="number" class="discountAmount" placeholder="金額（折扣請打負數）" style="width:150px;">' +
+    '<button type="button" class="btn btn-ghost" onclick="this.closest(\'.discount-row\').remove(); updateNewOrderTotal();">刪除</button>';
+  row.querySelector('.discountAmount').addEventListener('input', updateNewOrderTotal);
+  box.appendChild(row);
 }
 
 function updateNewOrderTotal(){
@@ -1168,13 +1303,57 @@ function updateNewOrderTotal(){
     tr.querySelector('.itemSubtotal').textContent = subtotal;
     total += subtotal;
   });
+  document.querySelectorAll('#discountRowsBody .discount-row').forEach(function(row){
+    total += Number(row.querySelector('.discountAmount').value) || 0;
+  });
   document.getElementById('newOrderTotal').textContent = total;
+}
+
+// ---------- 會員自動查詢帶入 ----------
+function lookupOrderMember(){
+  var phone = document.getElementById('newOrderPhone').value.trim();
+  var hint = document.getElementById('memberLookupHint');
+  if(!phone){ hint.textContent = ''; return; }
+
+  gasGet({ action:'adminFindMember', code: adminCode, phone: phone }).then(function(res){
+    if(!res.success || res.member.isNew){
+      hint.textContent = '查無此會員，將視為新會員建立';
+      return;
+    }
+    document.getElementById('newOrderName').value = res.member.name || '';
+    document.getElementById('newOrderSocialName').value = res.member.socialName || '';
+    hint.textContent = '已帶入會員資料：' + (res.member.tier || '一般會員') + '，購物金 NT$' + res.member.credit;
+  }).catch(function(){ hint.textContent = ''; });
+}
+
+// ---------- 團別商品快速加入 ----------
+function loadCatalogForNewOrder(){
+  var source = document.getElementById('newOrderSource').value;
+  var box = document.getElementById('catalogQuickAdd');
+  var chipsBox = document.getElementById('catalogChips');
+  if(!source){ box.style.display = 'none'; return; }
+
+  gasGet({ action:'adminGroupItems', code: adminCode, source: source }).then(function(res){
+    if(!res.success || !res.items.length){ box.style.display = 'none'; return; }
+    box.style.display = '';
+    chipsBox.innerHTML = '';
+    res.items.forEach(function(it){
+      var chip = document.createElement('div');
+      chip.className = 'catalog-chip';
+      chip.textContent = it.name + '（NT$' + it.price + '）';
+      chip.addEventListener('click', function(){
+        addNewOrderItemRow({ name: it.name, price: it.price });
+      });
+      chipsBox.appendChild(chip);
+    });
+  }).catch(function(){ box.style.display = 'none'; });
 }
 
 function createOrder(){
   var phone = document.getElementById('newOrderPhone').value.trim();
   var name = document.getElementById('newOrderName').value.trim();
-  var source = document.getElementById('newOrderSource').value.trim();
+  var socialName = document.getElementById('newOrderSocialName').value.trim();
+  var source = document.getElementById('newOrderSource').value;
   if(!phone || !name || !source){ alert('請填寫電話、姓名、團別'); return; }
 
   var items = [];
@@ -1183,21 +1362,32 @@ function createOrder(){
     if(!itemName) return;
     items.push({
       name: itemName,
+      variant: tr.querySelector('.itemVariant').value.trim(),
+      size: tr.querySelector('.itemSize').value.trim(),
       qty: Number(tr.querySelector('.itemQty').value) || 0,
       price: Number(tr.querySelector('.itemPrice').value) || 0
     });
   });
+  document.querySelectorAll('#discountRowsBody .discount-row').forEach(function(row){
+    var label = row.querySelector('.discountLabel').value.trim();
+    var amount = Number(row.querySelector('.discountAmount').value) || 0;
+    if(!label || !amount) return;
+    items.push({ name: '[優惠]' + label, variant: '', size: '', qty: 1, price: amount });
+  });
   if(!items.length){ alert('請至少新增一列品項'); return; }
 
   document.getElementById('createOrderBtn').disabled = true;
-  gasPostAction('adminCreateOrder', { code: adminCode, phone: phone, name: name, source: source, items: items })
+  gasPostAction('adminCreateOrder', { code: adminCode, phone: phone, name: name, socialName: socialName, source: source, items: items })
     .then(function(res){
       document.getElementById('createOrderBtn').disabled = false;
       if(res.success){
         alert('訂單建立成功！識別碼：' + res.orderKey);
         document.getElementById('newOrderPhone').value = '';
         document.getElementById('newOrderName').value = '';
+        document.getElementById('newOrderSocialName').value = '';
+        document.getElementById('memberLookupHint').textContent = '';
         document.getElementById('newOrderItemsBody').innerHTML = '';
+        document.getElementById('discountRowsBody').innerHTML = '';
         addNewOrderItemRow();
         updateNewOrderTotal();
       } else {
@@ -1210,6 +1400,48 @@ function createOrder(){
     });
 }
 addNewOrderItemRow();
+
+// ---------- 新增團別彈窗 ----------
+function openAddGroupModal(){
+  document.getElementById('addGroupModal').style.display = 'flex';
+  document.getElementById('groupModalName').value = '';
+  document.getElementById('groupModalItemsBody').innerHTML = '';
+  addGroupModalItemRow();
+}
+function closeAddGroupModal(){
+  document.getElementById('addGroupModal').style.display = 'none';
+}
+function addGroupModalItemRow(){
+  var tbody = document.getElementById('groupModalItemsBody');
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input type="text" class="gModalItemName" placeholder="品名"></td>' +
+    '<td><input type="number" class="gModalItemPrice" value="0" style="width:90px;"></td>' +
+    '<td><button type="button" class="btn btn-ghost" onclick="this.closest(\'tr\').remove();">刪除</button></td>';
+  tbody.appendChild(tr);
+}
+function submitAddGroup(){
+  var name = document.getElementById('groupModalName').value.trim();
+  if(!name){ alert('請輸入團別名稱'); return; }
+
+  var items = [];
+  document.querySelectorAll('#groupModalItemsBody tr').forEach(function(tr){
+    var itemName = tr.querySelector('.gModalItemName').value.trim();
+    if(!itemName) return;
+    items.push({ name: itemName, price: Number(tr.querySelector('.gModalItemPrice').value) || 0 });
+  });
+
+  document.getElementById('groupModalSubmitBtn').disabled = true;
+  gasPostAction('adminAddGroup', { code: adminCode, name: name, items: items }).then(function(res){
+    document.getElementById('groupModalSubmitBtn').disabled = false;
+    if(!res.success){ alert(res.message || '新增失敗'); return; }
+    closeAddGroupModal();
+    loadGroupOptions();
+  }).catch(function(){
+    document.getElementById('groupModalSubmitBtn').disabled = false;
+    alert('新增失敗，請確認網路連線');
+  });
+}
 
 // ===================== 叫貨統計 / 配貨清單 =====================
 
@@ -1230,21 +1462,27 @@ function loadItemSummary(){
     empty.style.display = 'none';
     res.items.forEach(function(it){
       var tr = document.createElement('tr');
+      var argSource = escapeHtml(source).replace(/'/g,"\\'");
+      var argName = escapeHtml(it.name).replace(/'/g,"\\'");
+      var argVariant = escapeHtml(it.variant || '').replace(/'/g,"\\'");
+      var argSize = escapeHtml(it.size || '').replace(/'/g,"\\'");
       tr.innerHTML =
         '<td>' + escapeHtml(it.name) + '</td>' +
+        '<td>' + escapeHtml(it.variant || '—') + '</td>' +
+        '<td>' + escapeHtml(it.size || '—') + '</td>' +
         '<td>' + it.totalQty + '</td>' +
         '<td>' + it.confirmedQty + '</td>' +
         '<td>' + it.allocatedQty + '</td>' +
         '<td>' + it.arrivedQty + '</td>' +
         '<td class="' + (it.availableNew > 0 ? 'allocated-yes' : '') + '">' + it.availableNew + '</td>' +
-        '<td><button type="button" class="btn btn-primary" onclick="allocateItem(\'' + escapeHtml(source).replace(/'/g,"\\'") + '\', \'' + escapeHtml(it.name).replace(/'/g,"\\'") + '\')">一鍵配貨</button></td>';
+        '<td><button type="button" class="btn btn-primary" onclick="allocateItem(\'' + argSource + '\', \'' + argName + '\', \'' + argVariant + '\', \'' + argSize + '\')">一鍵配貨</button></td>';
       body.appendChild(tr);
     });
   }).catch(function(){ alert('統計失敗，請確認網路連線'); });
 }
 
-function allocateItem(source, itemName){
-  gasPostAction('adminAllocate', { code: adminCode, source: source, item: itemName }).then(function(res){
+function allocateItem(source, itemName, variant, size){
+  gasPostAction('adminAllocate', { code: adminCode, source: source, item: itemName, variant: variant, size: size }).then(function(res){
     if(!res.success){ alert(res.message || '配貨失敗'); return; }
     alert('本次新配貨 ' + res.newlyAllocated + ' 筆，還在等待的 ' + res.remainingWaiting + ' 筆，剩餘新庫存 ' + res.remainingStock);
     loadItemSummary();
@@ -1254,13 +1492,17 @@ function allocateItem(source, itemName){
 function addArrival(){
   var source = document.getElementById('arrivalSource').value;
   var itemName = document.getElementById('arrivalItem').value.trim();
+  var variant = document.getElementById('arrivalVariant').value.trim();
+  var size = document.getElementById('arrivalSize').value.trim();
   var qty = Number(document.getElementById('arrivalQty').value) || 0;
   if(!source || !itemName || !qty){ alert('請選擇團別、填寫品項與到貨數量'); return; }
 
-  gasPostAction('adminAddArrival', { code: adminCode, source: source, item: itemName, qty: qty }).then(function(res){
+  gasPostAction('adminAddArrival', { code: adminCode, source: source, item: itemName, variant: variant, size: size, qty: qty }).then(function(res){
     if(!res.success){ alert(res.message || '登記失敗'); return; }
     alert('登記成功！');
     document.getElementById('arrivalItem').value = '';
+    document.getElementById('arrivalVariant').value = '';
+    document.getElementById('arrivalSize').value = '';
     document.getElementById('arrivalQty').value = '';
   }).catch(function(){ alert('登記失敗，請確認網路連線'); });
 }
@@ -1279,14 +1521,6 @@ function loadGroupOptions(){
   });
 }
 
-function promptAddGroup(){
-  var name = prompt('請輸入新團別名稱（例如：2026年8月團）');
-  if(!name || !name.trim()) return;
-  gasPostAction('adminAddGroup', { code: adminCode, name: name.trim() }).then(function(res){
-    if(!res.success){ alert(res.message || '新增失敗'); return; }
-    loadGroupOptions();
-  }).catch(function(){ alert('新增失敗，請確認網路連線'); });
-}
 </script>
 
 </body>
