@@ -305,7 +305,7 @@
 
         <div id="pendingBox" style="display:none; margin-top:20px;">
           <div class="hint">待付款訂單，可勾選多筆合併結帳：</div>
-          <div> ※ 貼心提醒：合併訂單商品將一併出貨，不提供拆單處理</div>
+          <div class="hint">提醒※合併結帳商品預購與現貨將一併出貨，不提供拆單處理</div>
           <div class="pending-list" id="pendingList"></div>
         </div>
         <div id="noPendingMsg" class="hint" style="display:none; margin-top:20px;">目前沒有待付款的訂單</div>
@@ -331,25 +331,24 @@
       <div class="field">
         <label>付款方式</label>
         <div class="choice-group" id="payMethodGroup">
-          <label class="choice"><input type="radio" name="payMethod" value="銀行轉帳（台新812）"> 銀行轉帳（台新 812）</label>
-          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay／iPASS 手機轉帳"> LINE Pay／iPASS 手機轉帳</label>
-          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay 條碼付款"> LINE Pay 條碼付款</label>
+          <label class="choice"><input type="radio" name="payMethod" value="銀行轉帳/ATM"> 銀行轉帳/ATM）</label>
+          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay／iPASS 好友手機轉帳"> LINE Pay／iPASS 好友手機轉帳</label>
+          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay 條碼付款（可刷卡）"> LINE Pay 條碼付款（可刷卡）</label>
           <label class="choice"><input type="radio" name="payMethod" value="購物金全額折抵"> 購物金全額折抵（免付款）</label>
         </div>
       </div>
 
       <div id="payMethodInfoBank" class="pay-info-box" style="display:none;">
         <div class="hint" style="margin:0 0 6px;">請轉帳至以下帳戶：</div>
-        <div id="台新銀行（812）<BR>
-                 28881023351575 style="white-space:pre-line; font-size:14px;"></div>
+        <div id="payMethodInfoBankText" style="white-space:pre-line; font-size:14px;"></div>
       </div>
       <div id="payMethodInfoLine" class="pay-info-box" style="display:none;">
-        <div class="hint" style="margin:0 0 8px;">請先加入賣家 LINE 好友再進行轉帳：</div>
-        <a id="https://line.me/ti/p/taMX75HZDW" href="#" target="_blank" class="btn btn-primary" style="display:inline-block; width:auto; text-decoration:none;">加入 LINE 好友</a>
+        <div class="hint" style="margin:0 0 8px;">請先加入豆媽 LINE 好友再進行手機轉帳：</div>
+        <a id="payMethodInfoLineLink" href="#" target="_blank" class="btn btn-primary" style="display:inline-block; width:auto; text-decoration:none;">加入 LINE 好友</a>
       </div>
       <div id="payMethodInfoQr" class="pay-info-box" style="display:none;">
-        <div class="hint" style="margin:0 0 8px;">請使用 LINE Pay 掃描以下條碼付款：</div>
-        <img id="LINEPAY.jpg" src="" style="max-width:220px; border-radius:12px; border:1px solid var(--line);">
+        <div class="hint" style="margin:0 0 8px;">請使用 LINE 掃描以下條碼付款：</div>
+        <img id="payMethodInfoQrImg" src="" style="max-width:220px; border-radius:12px; border:1px solid var(--line);">
       </div>
 
       <div id="proofSection">
@@ -668,7 +667,7 @@
 
 <script>
 // ⚠️ 部署完成後，請把下面這行換成您的 GAS 網頁應用程式網址
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbwCG4AUL85gFgHZnQb-tObMNLgbISo-CO7YI4B6x8TO7v-W5szR3dv0cV5CzIzHtxhcBA/exec';
+var GAS_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
 
 var state = {
   member: null,
