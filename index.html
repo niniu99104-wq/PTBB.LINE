@@ -76,7 +76,6 @@
   .btn-row .btn{ flex:1; }
   .link-btn{ background:none; border:none; color:var(--accent); font-size:13px; text-decoration:underline; cursor:pointer; padding:6px 0; font-family:inherit; }
 
-  /* 會員狀態卡 */
   .member-card{
     background:linear-gradient(135deg, var(--gold-light), #FFFDF8);
     border:1px solid var(--gold);
@@ -173,7 +172,6 @@
   .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--primary); animation:spin 0.8s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
-  /* ===== 出貨後台專用樣式 ===== */
   .admin-toolbar{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
   .admin-toolbar select{ width:auto; }
   .admin-table-scroll{ overflow-x:auto; }
@@ -231,12 +229,10 @@
 </style>
 </head>
 <body>
-
 <div class="loading-mask" id="loadingMask">
   <div class="spinner"></div>
   <div id="loadingText">處理中，請稍候…</div>
 </div>
-
 <div class="wrap" id="customerView">
   <header class="brand">
     <div class="mark">🥜 Peanut Bebe ｜豆媽選品</div>
@@ -333,7 +329,6 @@
         <div class="choice-group" id="payMethodGroup">
           <label class="choice"><input type="radio" name="payMethod" value="銀行轉帳/ATM"> 銀行轉帳/ATM）</label>
           <label class="choice"><input type="radio" name="payMethod" value="LINE Pay／iPASS 好友手機轉帳"> LINE Pay／iPASS 好友手機轉帳</label>
-          <label class="choice"><input type="radio" name="payMethod" value="LINE Pay 條碼付款（可刷卡）"> LINE Pay 條碼付款（可刷卡）</label>
           <label class="choice"><input type="radio" name="payMethod" value="購物金全額折抵"> 購物金全額折抵（免付款）</label>
         </div>
       </div>
@@ -346,17 +341,13 @@
         <div class="hint" style="margin:0 0 8px;">請先加入豆媽 LINE 好友再進行手機轉帳：</div>
         <a id="payMethodInfoLineLink" href="#" target="_blank" class="btn btn-primary" style="display:inline-block; width:auto; text-decoration:none;">加入 LINE 好友</a>
       </div>
-      <div id="payMethodInfoQr" class="pay-info-box" style="display:none;">
-        <div class="hint" style="margin:0 0 8px;">請使用 LINE 掃描以下條碼付款：</div>
-        <img id="payMethodInfoQrImg" src="" style="max-width:220px; border-radius:12px; border:1px solid var(--line);">
-      </div>
 
       <div id="proofSection">
         <div class="field">
           <label>付款證明（擇一提供即可）</label>
           <div class="choice-group" id="proofTypeGroup">
             <label class="choice"><input type="radio" name="proofType" value="截圖"> 上傳付款截圖</label>
-            <label class="choice"><input type="radio" name="proofType" value="末碼"> 輸入帳號末五碼／手機末三碼</label>
+            <label class="choice"><input type="radio" name="proofType" value="末碼"> 輸入帳號末五碼</label>
           </div>
         </div>
 
@@ -369,7 +360,7 @@
         <div id="proofCode" style="display:none;">
           <div class="field" style="margin-top:14px;">
             <label for="proofValue">末碼</label>
-            <input type="text" id="proofValue" placeholder="例如：末五碼 12345 或手機末三碼 678">
+            <input type="text" id="proofValue" placeholder="例如：末五碼 12345">
           </div>
         </div>
       </div>
@@ -989,16 +980,12 @@ function updatePayMethodInfo(payMethod){
   var settings = state.paymentSettings || {};
   document.getElementById('payMethodInfoBank').style.display = (payMethod === '銀行轉帳/ATM') ? '' : 'none';
   document.getElementById('payMethodInfoLine').style.display = (payMethod === 'LINE Pay／iPASS 好友手機轉帳') ? '' : 'none';
-  document.getElementById('payMethodInfoQr').style.display = (payMethod === 'LINE Pay 條碼付款') ? '' : 'none';
 
   if(payMethod === '銀行轉帳/ATM'){
     document.getElementById('payMethodInfoBankText').textContent = settings.bankInfo || '（尚未設定銀行帳戶資訊）';
   }
   if(payMethod === 'LINE Pay／iPASS 好友手機轉帳'){
     document.getElementById('payMethodInfoLineLink').href = settings.lineFriendUrl || '#';
-  }
-  if(payMethod === 'LINE Pay 條碼付款'){
-    document.getElementById('payMethodInfoQrImg').src = settings.linePayQrUrl || '';
   }
 }
 
