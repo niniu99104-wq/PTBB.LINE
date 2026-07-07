@@ -667,7 +667,7 @@
 
 <script>
 // ⚠️ 部署完成後，請把下面這行換成您的 GAS 網頁應用程式網址
-var GAS_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbyjcOVN0YxQPHMu6mWe1VpBAb4GmjgD8zyrAQ9tBsoX0OOl44CiiDWNxc4xTt7i2U6WMw/exec';
 
 var state = {
   member: null,
@@ -987,14 +987,14 @@ document.querySelectorAll('#payMethodGroup input, #proofTypeGroup input, #shipMe
 
 function updatePayMethodInfo(payMethod){
   var settings = state.paymentSettings || {};
-  document.getElementById('payMethodInfoBank').style.display = (payMethod === '銀行轉帳（台新812）') ? '' : 'none';
-  document.getElementById('payMethodInfoLine').style.display = (payMethod === 'LINE Pay／iPASS 手機轉帳') ? '' : 'none';
+  document.getElementById('payMethodInfoBank').style.display = (payMethod === '銀行轉帳/ATM') ? '' : 'none';
+  document.getElementById('payMethodInfoLine').style.display = (payMethod === 'LINE Pay／iPASS 好友手機轉帳') ? '' : 'none';
   document.getElementById('payMethodInfoQr').style.display = (payMethod === 'LINE Pay 條碼付款') ? '' : 'none';
 
-  if(payMethod === '銀行轉帳（台新812）'){
+  if(payMethod === '銀行轉帳/ATM'){
     document.getElementById('payMethodInfoBankText').textContent = settings.bankInfo || '（尚未設定銀行帳戶資訊）';
   }
-  if(payMethod === 'LINE Pay／iPASS 手機轉帳'){
+  if(payMethod === 'LINE Pay／iPASS 好友手機轉帳'){
     document.getElementById('payMethodInfoLineLink').href = settings.lineFriendUrl || '#';
   }
   if(payMethod === 'LINE Pay 條碼付款'){
